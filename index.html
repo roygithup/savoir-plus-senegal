@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sénégal Académie - Espace Dynamique</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root { --primary: #10b981; --dark-bg: #0f172a; }
+        body { background-color: var(--dark-bg); color: #f8fafc; font-family: 'Inter', system-ui, sans-serif; user-select: none; }
+        .glass { background: rgba(30, 41, 59, 0.7); backdrop-blur: 12px; border: 1px solid rgba(255, 255, 255, 0.1); }
+        .lesson-card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .lesson-card:hover { transform: translateY(-5px); border-color: var(--primary); }
+        .btn-gradient { background: linear-gradient(135deg, #10b981 0%, #059669 100%); transition: all 0.3s; }
+        .btn-gradient:hover { filter: brightness(1.1); transform: scale(1.02); }
+        .hidden { display: none !important; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-slide-up { animation: slideUp 0.5s ease-out forwards; }
+    </style>
+</head>
+<body oncontextmenu="return false;">
+
+    <!-- BARRE DE NAVIGATION -->
+    <nav class="glass sticky top-0 z-50 p-4 border-b border-slate-800">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <div class="flex items-center gap-2">
+                <div class="w-8 h-8 bg-emerald-500 rounded-lg flex items-center justify-center shadow-lg shadow-emerald-500/20">
+                    <i class="fas fa-book-open text-white text-sm"></i>
+                </div>
+                <h1 class="text-xl font-black tracking-tighter bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">
+                    SÉNÉGAL ACADÉMIE
+                </h1>
+            </div>
+            <div id="nav-info" class="hidden flex items-center gap-4">
+                <span id="user-tag" class="text-xs font-bold px-3 py-1 bg-emerald-500/10 text-emerald-400 rounded-full border border-emerald-500/20"></span>
+                <button onclick="location.reload()" class="text-slate-400 hover:text-white transition-colors">
+                    <i class="fas fa-sign-out-alt"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ZONE DE CONNEXION -->
+    <section id="auth-section" class="max-w-md mx-auto mt-20 p-8 glass rounded-3xl shadow-2xl animate-slide-up">
+        <div class="text-center mb-8">
+            <h2 class="text-3xl font-bold text-white mb-2">Bienvenue</h2>
+            <p class="text-slate-400">Accédez à votre contenu pédagogique exclusif</p>
+        </div>
+
+        <div class="space-y-4">
+            <div class="relative">
+                <i class="fas fa-key absolute left-4 top-1/2 -translate-y-1/2 text-slate-500"></i>
+                <input type="text" id="access-input" placeholder="CODE D'ACCÈS" 
+                    class="w-full bg-slate-900/50 border border-slate-700 rounded-2xl p-4 pl-12 text-center tracking-[0.3em] font-mono text-emerald-400 focus:ring-2 focus:ring-emerald-500 outline-none transition-all">
+            </div>
+            
+            <button onclick="handleLogin()" class="w-full btn-gradient text-white font-bold py-4 rounded-2xl shadow-lg shadow-emerald-900/20 active:scale-95">
+                SE CONNECTER
+            </button>
+
+            <button onclick="toggleModal('request-modal', true)" class="w-full py-4 text-slate-400 hover:text-white text-sm transition-colors flex items-center justify-center gap-2">
+                <i class="fab fa-whatsapp"></i> Pas encore de code ? Demander ici
+            </button>
+        </div>
+    </section>
+
+    <!-- PLATEFORME DE COURS (DYNAMIQUE) -->
+    <section id="course-section" class="hidden max-w-6xl mx-auto p-6 mt-8 animate-slide-up">
+        <header class="mb-12 text-center">
+            <h2 id="welcome-title" class="text-4xl font-black text-white mb-4 italic uppercase"></h2>
+            <p id="class-subtitle" class="text-emerald-400 font-medium tracking-widest uppercase text-sm"></p>
+            <div class="h-1 w-20 bg-emerald-500 mx-auto mt-4 rounded-full"></div>
+        </header>
+
+        <div id="courses-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Les cartes de cours seront injectées ici par le script -->
+        </div>
+    </section>
+
+    <!-- MODAL DE DEMANDE WHATSAPP -->
+    <div id="request-modal" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-950/90 backdrop-blur-sm">
+        <div class="bg-slate-800 border border-slate-700 w-full max-w-md rounded-3xl p-8 shadow-2xl">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-bold">Nouvelle Inscription</h3>
+                <button onclick="toggleModal('request-modal', false)" class="text-slate-400 hover:text-white"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="space-y-4">
+                <input type="text" id="reg-prenom" placeholder="Prénom" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 outline-none focus:border-emerald-500">
+                <input type="text" id="reg-nom" placeholder="Nom" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 outline-none focus:border-emerald-500">
+                <select id="reg-classe" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 outline-none focus:border-emerald-500">
+                    <option value="">Sélectionnez votre classe</option>
+                    <option>6ème</option><option>5ème</option><option>4ème</option><option>3ème</option>
+                    <option>Seconde</option><option>Première</option><option>Terminale</option>
+                </select>
+                <button onclick="submitRequest()" class="w-full btn-gradient py-4 rounded-xl font-bold flex items-center justify-center gap-2">
+                    <i class="fab fa-whatsapp"></i> ENVOYER VIA WHATSAPP
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /* ==========================================================
+           CONFIGURATION SIMPLE (MISE À JOUR FACILE)
+           ========================================================== */
+
+        // 1. LISTE DES ÉLÈVES (Le code est haché en SHA-256 pour la sécurité)
+        // Les noms sont en Base64 : "Amadou Sow" -> "QW1hZG91IFNvdw=="
+        const BD_ELEVES = {
+            "a045b0230536ab45355f499b9c71b9ff1e13cd7b06a03fd287fa67b056d1f7e1": { // Code original: ELEVE1234
+                nom: "QW1hZG91IFNvdw==", 
+                classe: "Terminale"
+            },
+            "29611e5425bec3f5634af29b6abd1fe574c59a3e6c2c13557d0b73c1ac535665": { // Code original: TEST2025
+                nom: "TW91c3NhIERpb3A=", // Moussa Diop
+                classe: "3ème"
+            }
+        };
+
+        // 2. LISTE DES COURS (S'affichent automatiquement selon la classe)
+        // Les liens sont en Base64 pour éviter le copier-coller direct du code source
+        const BD_COURS = [
+            {
+                titre: "Algèbre Linéaire",
+                classe: "Terminale",
+                icone: "fa-square-root-alt",
+                tags: ["Maths", "Calcul"],
+                urlVid: "aHR0cHM6Ly93d3cueW91dHViZS5jb20vd2F0Y2g/dj1xMUpYNTYzOThBcw==",
+                urlPdf: "aHR0cHM6Ly9kcml2ZS5nb29nbGUuY29tL2ZpbGUvZC8xaDZYMzZremdyYW93TDNocmVfN0xIT3hoUW5BeG9wMmUvcHJldmlldw=="
+            },
+            {
+                titre: "Électricité & Magnétisme",
+                classe: "Terminale",
+                icone: "fa-bolt",
+                tags: ["Physique", "Labo"],
+                urlVid: "aHR0cHM6Ly93d3cueW91dHViZS5jb20vd2F0Y2g/dj1aNVEzS1IyNmNtUQ==",
+                urlPdf: "aHR0cHM6Ly9kcml2ZS5nb29nbGUuY29tL2ZpbGUvZC8xLUJQMHNvNVZPbk5RT2NyRzNGSlg2QmsyalJKSnFKNi9wcmV2aWV3"
+            },
+            {
+                titre: "Thalès et Pythagore",
+                classe: "3ème",
+                icone: "fa-shapes",
+                tags: ["Géométrie", "Brevet"],
+                urlVid: "aHR0cHM6Ly93d3cueW91dHViZS5jb20vd2F0Y2g/dj1leGFtcGxl",
+                urlPdf: "aHR0cHM6Ly9kcml2ZS5nb29nbGUuY29tL2ZpbGUvZC9leGFtcGxlL3ByZXZpZXc="
+            }
+        ];
+
+        const CONTACT_WA = "KzIyMTc3MTczMzM0Ng=="; // Numéro WhatsApp encodé
+
+        /* ==========================================================
+           LOGIQUE DU SYSTÈME (DYNAMIQUE)
+           ========================================================== */
+
+        // Fonction de hachage sécurisée
+        async function hashValue(str) {
+            const buffer = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+            return Array.from(new Uint8Array(buffer)).map(b => b.toString(16).padStart(2, '0')).join('');
+        }
+
+        // Gestion de la connexion
+        async function handleLogin() {
+            const input = document.getElementById('access-input').value.trim().toUpperCase();
+            if (!input) return;
+
+            const hashed = await hashValue(input);
+            const eleve = BD_ELEVES[hashed];
+
+            if (eleve) {
+                renderApp(eleve);
+            } else {
+                alert("Code d'accès non reconnu.");
+            }
+        }
+
+        // Rendu dynamique de la plateforme
+        function renderApp(eleve) {
+            const nomClair = atob(eleve.nom);
+            
+            // Masquage/Affichage des sections
+            document.getElementById('auth-section').classList.add('hidden');
+            document.getElementById('course-section').classList.remove('hidden');
+            document.getElementById('nav-info').classList.remove('hidden');
+            
+            // Textes personnalisés
+            document.getElementById('welcome-title').innerText = `Bonjour, ${nomClair}`;
+            document.getElementById('class-subtitle').innerText = `Classe : ${eleve.classe}`;
+            document.getElementById('user-tag').innerText = eleve.classe;
+
+            const container = document.getElementById('courses-container');
+            container.innerHTML = '';
+
+            // FILTRAGE AUTOMATIQUE PAR CLASSE
+            const coursFiltrés = BD_COURS.filter(c => c.classe === eleve.classe);
+
+            if (coursFiltrés.length === 0) {
+                container.innerHTML = '<p class="col-span-full text-center text-slate-500 py-10">Aucun cours disponible pour votre niveau.</p>';
+            }
+
+            coursFiltrés.forEach(cours => {
+                const card = document.createElement('div');
+                card.className = "lesson-card glass rounded-3xl p-6 flex flex-col h-full";
+                card.innerHTML = `
+                    <div class="mb-4 flex justify-between items-start">
+                        <div class="w-12 h-12 bg-slate-800 rounded-2xl flex items-center justify-center text-emerald-400">
+                            <i class="fas ${cours.icone} text-xl"></i>
+                        </div>
+                        <div class="flex gap-1">
+                            ${cours.tags.map(t => `<span class="text-[10px] bg-white/5 border border-white/10 px-2 py-1 rounded-md text-slate-400">${t}</span>`).join('')}
+                        </div>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-6">${cours.titre}</h3>
+                    <div class="mt-auto space-y-3">
+                        <button onclick="window.open(atob('${cours.urlVid}'), '_blank')" class="w-full py-3 bg-red-600/10 hover:bg-red-600 text-red-500 hover:text-white rounded-xl text-sm font-bold transition-all flex items-center justify-center gap-2">
+                            <i class="fab fa-youtube"></i> REGARDER LA VIDÉO
+                        </button>
+                        <button onclick="window.open(atob('${cours.urlPdf}'), '_blank')" class="w-full py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-sm font-semibold transition-all flex items-center justify-center gap-2">
+                            <i class="far fa-file-pdf text-emerald-500"></i> LIRE LE SUPPORT
+                        </button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // Gestion de la demande WhatsApp
+        function submitRequest() {
+            const p = document.getElementById('reg-prenom').value;
+            const n = document.getElementById('reg-nom').value;
+            const c = document.getElementById('reg-classe').value;
+            if(!p || !n || !c) return alert("Champs incomplets.");
+            
+            const msg = `Bonjour Sénégal Académie, je suis ${p} ${n} en ${c}. Je souhaite acheter un code.`;
+            window.open(`https://wa.me/${atob(CONTACT_WA).replace('+', '')}?text=${encodeURIComponent(msg)}`, '_blank');
+            toggleModal('request-modal', false);
+        }
+
+        function toggleModal(id, show) {
+            document.getElementById(id).classList.toggle('hidden', !show);
+        }
+
+        // Sécurité système
+        document.addEventListener('keydown', e => {
+            if ((e.ctrlKey && ['s','u','i'].includes(e.key)) || e.key === 'F12') e.preventDefault();
+        });
+        setInterval(() => console.clear(), 2000);
+    </script>
+</body>
+</html>
