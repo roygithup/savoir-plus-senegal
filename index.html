@@ -17,6 +17,8 @@
         .hidden { display: none !important; }
         @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         .animate-slide-up { animation: slideUp 0.5s ease-out forwards; }
+        .error-shake { animation: shake 0.4s ease-in-out; border-color: #ef4444 !important; }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-10px); } 75% { transform: translateX(10px); } }
     </style>
 </head>
 <body oncontextmenu="return false;">
@@ -49,7 +51,7 @@
         </div>
 
         <div class="space-y-4">
-            <div class="relative">
+            <div class="relative" id="input-container">
                 <i class="fas fa-key absolute left-4 top-1/2 -translate-y-1/2 text-slate-500"></i>
                 <input type="text" id="access-input" placeholder="CODE D'ACCÈS" 
                     class="w-full bg-slate-900/50 border border-slate-700 rounded-2xl p-4 pl-12 text-center tracking-[0.3em] font-mono text-emerald-400 focus:ring-2 focus:ring-emerald-500 outline-none transition-all">
@@ -59,13 +61,23 @@
                 SE CONNECTER
             </button>
 
+            <!-- Bouton de réactivation (caché par défaut) -->
+            <button id="reactivate-btn" onclick="sendReactivationRequest()" class="hidden w-full bg-red-500/10 hover:bg-red-500/20 text-red-500 border border-red-500/30 font-bold py-4 rounded-2xl transition-all flex items-center justify-center gap-2">
+                <i class="fab fa-whatsapp"></i> ABONNEMENT EXPIRÉ : RÉACTIVER
+            </button>
+
+            <!-- Bouton Code Inexistant (caché par défaut) -->
+            <button id="unknown-code-btn" onclick="toggleModal('request-modal', true)" class="hidden w-full bg-red-500/10 hover:bg-red-500/20 text-red-500 border border-red-500/30 font-bold py-4 rounded-2xl transition-all flex items-center justify-center gap-2">
+                <i class="fas fa-user-plus"></i> CODE INEXISTANT : DEMANDER ICI
+            </button>
+
             <button onclick="toggleModal('request-modal', true)" class="w-full py-4 text-slate-400 hover:text-white text-sm transition-colors flex items-center justify-center gap-2">
-                <i class="fab fa-whatsapp"></i> Pas encore de code ? Demander ici
+                <i class="fab fa-whatsapp"></i> Aide & Support WhatsApp
             </button>
         </div>
     </section>
 
-    <!-- PLATEFORME DE COURS (DYNAMIQUE) -->
+    <!-- PLATEFORME DE COURS -->
     <section id="course-section" class="hidden max-w-6xl mx-auto p-6 mt-8 animate-slide-up">
         <header class="mb-12 text-center">
             <h2 id="welcome-title" class="text-4xl font-black text-white mb-4 italic uppercase"></h2>
@@ -73,16 +85,14 @@
             <div class="h-1 w-20 bg-emerald-500 mx-auto mt-4 rounded-full"></div>
         </header>
 
-        <div id="courses-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <!-- Les cartes de cours seront injectées ici par le script -->
-        </div>
+        <div id="courses-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
     </section>
 
-    <!-- MODAL DE DEMANDE WHATSAPP -->
+    <!-- MODAL DE DEMANDE -->
     <div id="request-modal" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-950/90 backdrop-blur-sm">
         <div class="bg-slate-800 border border-slate-700 w-full max-w-md rounded-3xl p-8 shadow-2xl">
             <div class="flex justify-between items-center mb-6">
-                <h3 class="text-xl font-bold">Nouvelle Inscription</h3>
+                <h3 class="text-xl font-bold">Demander un Accès</h3>
                 <button onclick="toggleModal('request-modal', false)" class="text-slate-400 hover:text-white"><i class="fas fa-times"></i></button>
             </div>
             <div class="space-y-4">
@@ -94,145 +104,161 @@
                     <option>Seconde</option><option>Première</option><option>Terminale</option>
                 </select>
                 <button onclick="submitRequest()" class="w-full btn-gradient py-4 rounded-xl font-bold flex items-center justify-center gap-2">
-                    <i class="fab fa-whatsapp"></i> ENVOYER VIA WHATSAPP
+                    <i class="fab fa-whatsapp"></i> ENVOYER MA DEMANDE
                 </button>
             </div>
         </div>
     </div>
 
     <script>
-        /* ==========================================================
-           CONFIGURATION SIMPLE (MISE À JOUR FACILE)
-           ========================================================== */
-
-        // 1. LISTE DES ÉLÈVES (Le code est haché en SHA-256 pour la sécurité)
-        // Les noms sont en Base64 : "Amadou Sow" -> "QW1hZG91IFNvdw=="
         const BD_ELEVES = {
-            "a045b0230536ab45355f499b9c71b9ff1e13cd7b06a03fd287fa67b056d1f7e1": { // Code original: ELEVE1234
-                nom: "QW1hZG91IFNvdw==", 
-                classe: "Terminale"
-            },
-            "29611e5425bec3f5634af29b6abd1fe574c59a3e6c2c13557d0b73c1ac535665": { // Code original: TEST2025
-                nom: "TW91c3NhIERpb3A=", // Moussa Diop
-                classe: "3ème"
-            }
+            "a045b0230536ab45355f499b9c71b9ff1e13cd7b06a03fd287fa67b056d1f7e1": { nom: "QW1hZG91IFNvdw==", classe: "Terminale", actif: 1 },
+            "29611e5425bec3f5634af29b6abd1fe574c59a3e6c2c13557d0b73c1ac535665": { nom: "TW91c3NhIERpb3A=", classe: "3ème", actif: 1 }
         };
 
-        // 2. LISTE DES COURS (S'affichent automatiquement selon la classe)
-        // Les liens sont en Base64 pour éviter le copier-coller direct du code source
         const BD_COURS = [
-{
+                         { 
+                titre: "🧠 Leç13 : (Partie 1/4)  LA PRESSION ARTERIELLE ET SA REGULATION",
+                classe: "Terminale",
+                icone: "fa-bolt",
+                objectifs: [
+"L’anatomie du cœur : ses cavités, ses valvules, sa paroi et la circulation coronaire.",
+"La structure du tissu cardiaque observé au microscope optique et électronique.",
+"Comment le myocarde fonctionne et pourquoi il obéit à la loi du tout ou rien",
+"Les premières clés pour comprendre la pression artérielle et sa régulation."
+],
+                urlVid: "aHR0cHM6Ly95b3V0dS5iZS83eXJBMmJxcFpPUQ==",
+                urlPdf: "aHR0cHM6Ly9kcml2ZS5nb29nbGUuY29tL2ZpbGUvZC8xRlgtQU84TWpYSmxZTGhYckhYc0xuVGxqOXFJaFdGZy0vdmlldz91c3A9ZHJpdmVfbGluaw=="
+            },
+             { 
+                titre: "🧠 Leç13 : (Partie 2/4)  LA PRESSION ARTERIELLE ET SA REGULATION (Pouls, Bruits)",
+                classe: "Terminale",
+                icone: "fa-bolt",
+                objectifs: [
+"Les manifestations directes : comment sentir les pulsations cardiaques et le pouls.",
+"Les bruits du cœur : à quoi correspondent les fameux « toum » et « tac » entendus au stéthoscope.",
+"L’observation indirecte : le principe de la cardiographie et l’analyse d’un cardiogramme.",
+"Le cycle cardiaque détaillé : systole auriculaire, systole ventriculaire, diastole générale.",
+"Pourquoi le cœur se repose plus longtemps qu’il ne travaille (durée des diastoles  systoles)."
+],
+                urlVid: "aHR0cHM6Ly95b3V0dS5iZS9vcVJDODRQb1gxOA==",
+                urlPdf: "aHR0cHM6Ly9kcml2ZS5nb29nbGUuY29tL2ZpbGUvZC8xV0N3MzFGc0c2QjA5MXJJdFFXZjVYakUtUkg0d25Kai0vdmlldz91c3A9ZHJpdmVfbGluaw=="
+            },
+            {
                 titre: "🧠 Chapitre 13 (Partie 3/4)– La Pression Artérielle et sa Régulation : Le Contrôle Nerveux du Cœur",
                 classe: "Terminale",
                 icone: "fa-bolt",
-                tags: [" Les barorécepteurs et chémorécepteurs ", "Les centres nerveux régulateurs dans le bulbe rachidien","Les nerfs sensitifs (Hering, Cyon, X) et les nerfs moteurs "],
+                objectifs: [
+                    "Comprendre le rôle des barorécepteurs et chémorécepteurs",
+                    "Identifier les centres nerveux régulateurs dans le bulbe rachidien",
+                    "Distinguer les nerfs sensitifs (Hering, Cyon, X) des nerfs moteurs"
+                ],
                 urlVid: "aHR0cHM6Ly93d3cueW91dHViZS5jb20vd2F0Y2g/dj1aNVEzS1IyNmNtUQ==",
-                urlPdf: "aHR0cHM6Ly9kcml2ZS5nb29nbGUuY29tL2ZpbGUvZC8xLUJQMHNvNVZPbk5RT2NyRzNGSlg2QmsyalJKSnFKNi9wcmV2aWV3"
+                urlPdf: "aHR0cHM6Ly9kcml2ZS5nb29nbGUuY29tL2ZpbGUvZC8xUkNjaHVTc0FhYmdBbkp3QjhtNGVpamZFTU9naUUybVEvdmlldz91c3A9ZHJpdmVfbGluaw=="
             },
-
             {
                 titre: "Chapitre 13 (Partie 4/4) – Pression Artérielle : Variations & Mécanismes de Régulation",
                 classe: "Terminale",
-                icone: "📊",
-                tags: ["🔹 Les facteurs de variation ", "🔹 Le principe du brassard et du stéthoscope"],
+                icone: "fa-chart-line",
+                objectifs: [
+                    "Analyser les différents facteurs de variation de la pression artérielle",
+                    "Maîtriser le principe de mesure avec le brassard et le stéthoscope"
+                ],
                 urlVid: "aHR0cHM6Ly93d3cueW91dHViZS5jb20vd2F0Y2g/dj1xMUpYNTYzOThBcw==",
-                urlPdf: "aHR0cHM6Ly9kcml2ZS5nb29nbGUuY29tL2ZpbGUvZC8xaDZYMzZremdyYW93TDNocmVfN0xIT3hoUW5BeG9wMmUvcHJldmlldw=="
-            },
-            {
-                titre: "Thalès et Pythagore",
-                classe: "3ème",
-                icone: "fa-shapes",
-                tags: ["Géométrie", "Brevet"],
-                urlVid: "aHR0cHM6Ly93d3cueW91dHViZS5jb20vd2F0Y2g/dj1leGFtcGxl",
-                urlPdf: "aHR0cHM6Ly9kcml2ZS5nb29nbGUuY29tL2ZpbGUvZC9leGFtcGxlL3ByZXZpZXc="
+                urlPdf: "aHR0cHM6Ly9kcml2ZS5nb29nbGUuY29tL2ZpbGUvZC8xVWViSDVRNXRpRTZNa2gtWUVqMVFPY092Z19qTVZzcGUvdmlldz91c3A9ZHJpdmVfbGluaw=="
             }
         ];
 
-        const CONTACT_WA = "KzIyMTc3MTczMzM0Ng=="; // Numéro WhatsApp encodé
+        const CONTACT_WA = "KzIyMTc3MTczMzM0Mg==";
 
-        /* ==========================================================
-           LOGIQUE DU SYSTÈME (DYNAMIQUE)
-           ========================================================== */
-
-        // Fonction de hachage sécurisée
         async function hashValue(str) {
             const buffer = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
             return Array.from(new Uint8Array(buffer)).map(b => b.toString(16).padStart(2, '0')).join('');
         }
 
-        // Gestion de la connexion
         async function handleLogin() {
-            const input = document.getElementById('access-input').value.trim().toUpperCase();
+            const inputField = document.getElementById('access-input');
+            const input = inputField.value.trim().toUpperCase();
+            const reactivateBtn = document.getElementById('reactivate-btn');
+            const unknownBtn = document.getElementById('unknown-code-btn');
+            
             if (!input) return;
 
             const hashed = await hashValue(input);
             const eleve = BD_ELEVES[hashed];
 
+            reactivateBtn.classList.add('hidden');
+            unknownBtn.classList.add('hidden');
+
             if (eleve) {
-                renderApp(eleve);
+                if (eleve.actif === 1) {
+                    renderApp(eleve);
+                } else {
+                    inputField.classList.add('error-shake');
+                    setTimeout(() => inputField.classList.remove('error-shake'), 400);
+                    reactivateBtn.classList.remove('hidden'); 
+                    alert("⚠️ ABONNEMENT EXPIRÉ\n\nVotre accès a été suspendu. Veuillez nous contacter pour réactiver votre compte.");
+                }
             } else {
-                alert("Code d'accès non reconnu.");
+                inputField.classList.add('error-shake');
+                setTimeout(() => inputField.classList.remove('error-shake'), 400);
+                unknownBtn.classList.remove('hidden');
+                alert("❌ CODE INEXISTANT\n\nCe code n'est pas reconnu par notre système.");
             }
         }
 
-        // Rendu dynamique de la plateforme
+        function sendReactivationRequest() {
+            const code = document.getElementById('access-input').value.trim().toUpperCase();
+            const msg = `Bonjour Sénégal Académie,\n\nMon abonnement a expiré. Je souhaite le réactiver.\n\nMon code actuel est : ${code}`;
+            window.open(`https://wa.me/${atob(CONTACT_WA).replace('+', '')}?text=${encodeURIComponent(msg)}`, '_blank');
+        }
+
         function renderApp(eleve) {
             const nomClair = atob(eleve.nom);
-            
-            // Masquage/Affichage des sections
             document.getElementById('auth-section').classList.add('hidden');
             document.getElementById('course-section').classList.remove('hidden');
             document.getElementById('nav-info').classList.remove('hidden');
-            
-            // Textes personnalisés
             document.getElementById('welcome-title').innerText = `Bonjour, ${nomClair}`;
             document.getElementById('class-subtitle').innerText = `Classe : ${eleve.classe}`;
             document.getElementById('user-tag').innerText = eleve.classe;
-
             const container = document.getElementById('courses-container');
             container.innerHTML = '';
-
-            // FILTRAGE AUTOMATIQUE PAR CLASSE
-            const coursFiltrés = BD_COURS.filter(c => c.classe === eleve.classe);
-
-            if (coursFiltrés.length === 0) {
-                container.innerHTML = '<p class="col-span-full text-center text-slate-500 py-10">Aucun cours disponible pour votre niveau.</p>';
-            }
-
-            coursFiltrés.forEach(cours => {
+            
+            BD_COURS.filter(c => c.classe === eleve.classe).forEach(cours => {
                 const card = document.createElement('div');
                 card.className = "lesson-card glass rounded-3xl p-6 flex flex-col h-full";
                 card.innerHTML = `
                     <div class="mb-4 flex justify-between items-start">
-                        <div class="w-12 h-12 bg-slate-800 rounded-2xl flex items-center justify-center text-emerald-400">
-                            <i class="fas ${cours.icone} text-xl"></i>
-                        </div>
-                        <div class="flex gap-1">
-                            ${cours.tags.map(t => `<span class="text-[10px] bg-white/5 border border-white/10 px-2 py-1 rounded-md text-slate-400">${t}</span>`).join('')}
-                        </div>
+                        <div class="w-12 h-12 bg-slate-800 rounded-2xl flex items-center justify-center text-emerald-400"><i class="fas ${cours.icone} text-xl"></i></div>
                     </div>
-                    <h3 class="text-xl font-bold text-white mb-6">${cours.titre}</h3>
+                    <h3 class="text-xl font-bold text-white mb-4">${cours.titre}</h3>
+                    
+                    <div class="mb-6">
+                        <p class="text-emerald-400 text-xs font-bold uppercase tracking-widest mb-2">Objectifs de la leçon :</p>
+                        <ol class="space-y-2">
+                            ${cours.objectifs.map((obj, index) => `
+                                <li class="text-slate-400 text-sm flex gap-2">
+                                    <span class="text-emerald-500 font-bold">${index + 1}.</span>
+                                    <span>${obj}</span>
+                                </li>
+                            `).join('')}
+                        </ol>
+                    </div>
+
                     <div class="mt-auto space-y-3">
-                        <button onclick="window.open(atob('${cours.urlVid}'), '_blank')" class="w-full py-3 bg-red-600/10 hover:bg-red-600 text-red-500 hover:text-white rounded-xl text-sm font-bold transition-all flex items-center justify-center gap-2">
-                            <i class="fab fa-youtube"></i> REGARDER LA VIDÉO
-                        </button>
-                        <button onclick="window.open(atob('${cours.urlPdf}'), '_blank')" class="w-full py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-sm font-semibold transition-all flex items-center justify-center gap-2">
-                            <i class="far fa-file-pdf text-emerald-500"></i> LIRE LE SUPPORT
-                        </button>
-                    </div>
-                `;
+                        <button onclick="window.open(atob('${cours.urlVid}'), '_blank')" class="w-full py-3 bg-red-600/10 hover:bg-red-600 text-red-500 hover:text-white rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-all"><i class="fab fa-youtube"></i> VIDÉO</button>
+                        <button onclick="window.open(atob('${cours.urlPdf}'), '_blank')" class="w-full py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-all"><i class="far fa-file-pdf"></i> SUPPORT</button>
+                    </div>`;
                 container.appendChild(card);
             });
         }
 
-        // Gestion de la demande WhatsApp
         function submitRequest() {
             const p = document.getElementById('reg-prenom').value;
             const n = document.getElementById('reg-nom').value;
             const c = document.getElementById('reg-classe').value;
             if(!p || !n || !c) return alert("Champs incomplets.");
-            
-            const msg = `Bonjour Sénégal Académie, je suis ${p} ${n} en ${c}. Je souhaite acheter un code.`;
+            const msg = `Bonjour Sénégal Académie, je suis ${p} ${n} en ${c}. Je souhaite obtenir un code d'accès.`;
             window.open(`https://wa.me/${atob(CONTACT_WA).replace('+', '')}?text=${encodeURIComponent(msg)}`, '_blank');
             toggleModal('request-modal', false);
         }
@@ -241,12 +267,8 @@
             document.getElementById(id).classList.toggle('hidden', !show);
         }
 
-        // Sécurité système
-        document.addEventListener('keydown', e => {
-            if ((e.ctrlKey && ['s','u','i'].includes(e.key)) || e.key === 'F12') e.preventDefault();
-        });
+        document.addEventListener('keydown', e => { if ((e.ctrlKey && ['s','u','i'].includes(e.key)) || e.key === 'F12') e.preventDefault(); });
         setInterval(() => console.clear(), 2000);
     </script>
 </body>
-
 </html>
