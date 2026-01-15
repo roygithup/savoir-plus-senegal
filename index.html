@@ -3,31 +3,63 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sénégal Académie - Espace Dynamique</title>
+    <title>Sénégal Académie - Excellence en SVT</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         :root { --primary: #10b981; --dark-bg: #0f172a; }
-        body { background-color: var(--dark-bg); color: #f8fafc; font-family: 'Inter', system-ui, sans-serif; user-select: none; }
+        body { background-color: var(--dark-bg); color: #f8fafc; font-family: 'Inter', system-ui, sans-serif; user-select: none; scroll-behavior: smooth; }
         .glass { background: rgba(30, 41, 59, 0.7); backdrop-blur: 12px; border: 1px solid rgba(255, 255, 255, 0.1); }
-        .lesson-card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
-        .lesson-card:hover { transform: translateY(-5px); border-color: var(--primary); }
         .btn-gradient { background: linear-gradient(135deg, #10b981 0%, #059669 100%); transition: all 0.3s; }
         .btn-gradient:hover { filter: brightness(1.1); transform: scale(1.02); }
         .hidden { display: none !important; }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-        .animate-slide-up { animation: slideUp 0.5s ease-out forwards; }
+        
+        /* Styles pour les éléments verrouillés */
+        .lock-indicator { 
+            position: absolute; 
+            top: 1rem; 
+            right: 1rem; 
+            color: #10b981; 
+            background: rgba(16, 185, 129, 0.1);
+            padding: 8px;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+            cursor: pointer;
+        }
+        
+        .locked-action {
+            position: relative;
+            overflow: hidden;
+            filter: grayscale(0.5);
+            cursor: not-allowed;
+        }
+
+        .locked-action::after {
+            content: "\f023";
+            font-family: "Font Awesome 5 Free";
+            font-weight: 900;
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 0.8rem;
+        }
+
+        @keyframes pulse { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.1); opacity: 0.7; } }
+        @keyframes slideIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-in { animation: slideIn 0.6s ease-out forwards; }
+        
         .error-shake { animation: shake 0.4s ease-in-out; border-color: #ef4444 !important; }
         @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-10px); } 75% { transform: translateX(10px); } }
     </style>
 </head>
 <body oncontextmenu="return false;">
 
-    <!-- BARRE DE NAVIGATION -->
+    <!-- NAVIGATION -->
     <nav class="glass sticky top-0 z-50 p-4 border-b border-slate-800">
         <div class="max-w-7xl mx-auto flex justify-between items-center">
-            <div class="flex items-center gap-2">
-                <div class="w-8 h-8 bg-emerald-500 rounded-lg flex items-center justify-center shadow-lg shadow-emerald-500/20">
+            <div class="flex items-center gap-2 cursor-pointer" onclick="location.reload()">
+                <div class="w-8 h-8 bg-emerald-500 rounded-lg flex items-center justify-center shadow-lg">
                     <i class="fas fa-book-open text-white text-sm"></i>
                 </div>
                 <h1 class="text-xl font-black tracking-tighter bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">
@@ -40,93 +72,126 @@
                     <i class="fas fa-sign-out-alt"></i>
                 </button>
             </div>
+            <div id="nav-guest">
+                <button onclick="showAuth()" class="text-emerald-400 font-bold text-sm border border-emerald-500/30 px-4 py-2 rounded-xl hover:bg-emerald-500/10 transition-all">
+                    CONNEXION
+                </button>
+            </div>
         </div>
     </nav>
 
-    <!-- ZONE DE CONNEXION -->
-    <section id="auth-section" class="max-w-md mx-auto mt-20 p-8 glass rounded-3xl shadow-2xl animate-slide-up">
-        <div class="text-center mb-8">
-            <h2 class="text-3xl font-bold text-white mb-2">Bienvenue</h2>
-            <p class="text-slate-400">Accédez à votre contenu pédagogique exclusif</p>
-        </div>
-
-        <div class="space-y-4">
-            <div class="relative" id="input-container">
-                <i class="fas fa-key absolute left-4 top-1/2 -translate-y-1/2 text-slate-500"></i>
-                <input type="text" id="access-input" placeholder="CODE D'ACCÈS" 
-                    class="w-full bg-slate-900/50 border border-slate-700 rounded-2xl p-4 pl-12 text-center tracking-[0.3em] font-mono text-emerald-400 focus:ring-2 focus:ring-emerald-500 outline-none transition-all">
+    <!-- ENTÊTE ACCUEIL -->
+    <header id="header-welcome" class="max-w-7xl mx-auto px-6 pt-16 pb-8 text-center animate-in">
+        <h2 class="text-4xl md:text-6xl font-black text-white mb-4 leading-tight">
+            Votre Réussite commence <span class="text-emerald-500">Ici</span>
+        </h2>
+        <div class="text-slate-400 max-w-2xl mx-auto mb-8 space-y-4">
+            <p>Accédez facilement à nos cours de SVT clairs et efficaces. Chaque chapitre indique ses objectifs pour aller droit à l’essentiel.</p>
+            <div class="flex justify-center gap-6 text-sm font-bold text-emerald-400">
+                <span><i class="fas fa-video mr-2"></i>Vidéos</span>
+                <span><i class="fas fa-file-pdf mr-2"></i>Supports</span>
+                <span><i class="fas fa-bolt mr-2"></i>Révisions</span>
             </div>
+            <p class="text-white">Abonnement mensuel : <strong class="text-emerald-500 text-xl">500 FCFA</strong> seulement.</p>
+        </div>
+    </header>
+
+    <!-- CATALOGUE DES COURS -->
+    <section id="catalogue-section" class="max-w-7xl mx-auto px-6 pb-20">
+        <div id="courses-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <!-- Injecté par JS -->
+        </div>
+    </section>
+
+    <!-- MODAL DE CONNEXION / AUTH -->
+    <div id="auth-modal" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-950/90 backdrop-blur-md">
+        <div class="bg-slate-900 border border-slate-700 w-full max-w-md rounded-3xl p-8 shadow-2xl relative animate-in">
+            <button onclick="toggleModal('auth-modal', false)" class="absolute top-6 right-6 text-slate-500 hover:text-white">
+                <i class="fas fa-times text-xl"></i>
+            </button>
             
-            <button onclick="handleLogin()" class="w-full btn-gradient text-white font-bold py-4 rounded-2xl shadow-lg shadow-emerald-900/20 active:scale-95">
-                SE CONNECTER
-            </button>
-
-            <!-- Bouton de réactivation (caché par défaut) -->
-            <button id="reactivate-btn" onclick="sendReactivationRequest()" class="hidden w-full bg-red-500/10 hover:bg-red-500/20 text-red-500 border border-red-500/30 font-bold py-4 rounded-2xl transition-all flex items-center justify-center gap-2">
-                <i class="fab fa-whatsapp"></i> ABONNEMENT EXPIRÉ : RÉACTIVER
-            </button>
-
-            <!-- Bouton Code Inexistant (caché par défaut) -->
-            <button id="unknown-code-btn" onclick="toggleModal('request-modal', true)" class="hidden w-full bg-red-500/10 hover:bg-red-500/20 text-red-500 border border-red-500/30 font-bold py-4 rounded-2xl transition-all flex items-center justify-center gap-2">
-                <i class="fas fa-user-plus"></i> CODE INEXISTANT : DEMANDER ICI
-            </button>
-
-            <button onclick="toggleModal('request-modal', true)" class="w-full py-4 text-slate-400 hover:text-white text-sm transition-colors flex items-center justify-center gap-2">
-                <i class="fab fa-whatsapp"></i> Aide & Support WhatsApp
-            </button>
-        </div>
-    </section>
-
-    <!-- PLATEFORME DE COURS -->
-    <section id="course-section" class="hidden max-w-6xl mx-auto p-6 mt-8 animate-slide-up">
-        <header class="mb-12 text-center">
-            <h2 id="welcome-title" class="text-4xl font-black text-white mb-4 italic uppercase"></h2>
-            <p id="class-subtitle" class="text-emerald-400 font-medium tracking-widest uppercase text-sm"></p>
-            <div class="h-1 w-20 bg-emerald-500 mx-auto mt-4 rounded-full"></div>
-        </header>
-
-        <div id="courses-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
-    </section>
-
-    <!-- MODAL DE DEMANDE -->
-    <div id="request-modal" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-950/90 backdrop-blur-sm">
-        <div class="bg-slate-800 border border-slate-700 w-full max-w-md rounded-3xl p-8 shadow-2xl">
-            <div class="flex justify-between items-center mb-6">
-                <h3 class="text-xl font-bold">Demander un Accès</h3>
-                <button onclick="toggleModal('request-modal', false)" class="text-slate-400 hover:text-white"><i class="fas fa-times"></i></button>
+            <div class="text-center mb-8">
+                <h3 class="text-2xl font-bold text-white mb-2">Accès Sécurisé</h3>
+                <p class="text-slate-400 text-sm">Entrez votre code pour déverrouiller ce contenu</p>
             </div>
+
+            <div class="space-y-4">
+                <div class="relative">
+                    <i class="fas fa-key absolute left-4 top-1/2 -translate-y-1/2 text-slate-500"></i>
+                    <input type="text" id="access-input" placeholder="VOTRE CODE" 
+                        class="w-full bg-slate-950 border border-slate-800 rounded-2xl p-4 pl-12 text-center tracking-widest font-mono text-emerald-400 focus:ring-2 focus:ring-emerald-500 outline-none transition-all">
+                </div>
+                
+                <button onclick="handleLogin()" class="w-full btn-gradient text-white font-bold py-4 rounded-2xl shadow-lg active:scale-95">
+                    DÉVERROUILLER
+                </button>
+
+                <!-- Zone de message pour abonnement non payé -->
+                <div id="unpaid-msg-box" class="hidden bg-amber-500/10 border border-amber-500/30 rounded-2xl p-5 text-center animate-in">
+                    <p class="text-amber-400 font-bold text-lg mb-1" id="unpaid-user-name"></p>
+                    <p class="text-white text-sm mb-3 font-semibold">Code valide ✅ — Abonnement non payé ❌</p>
+                    <p class="text-slate-300 text-xs leading-relaxed mb-4">
+                        Envoyez un message WhatsApp pour payer 500 FCFA via Wave.<br>
+                        Activation du code dans l’heure.
+                    </p>
+                    <button onclick="sendReactivationRequest()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 rounded-xl transition-all flex items-center justify-center gap-2">
+                        <i class="fab fa-whatsapp"></i> PAYER VIA WHATSAPP
+                    </button>
+                </div>
+
+                <div id="auth-alerts" class="space-y-3">
+                    <button id="unknown-code-btn" onclick="toggleModal('request-modal', true); toggleModal('auth-modal', false)" class="hidden w-full bg-red-500/10 hover:bg-red-500/20 text-red-500 border border-red-500/30 font-bold py-4 rounded-2xl transition-all flex items-center justify-center gap-2">
+                        <i class="fas fa-user-plus"></i> CODE INEXISTANT : DEMANDER
+                    </button>
+                </div>
+
+                <button onclick="toggleModal('request-modal', true); toggleModal('auth-modal', false)" class="w-full py-2 text-slate-400 hover:text-white text-xs transition-colors underline">
+                    Je n'ai pas encore de code d'accès
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DE DEMANDE D'ACCÈS -->
+    <div id="request-modal" class="hidden fixed inset-0 z-[110] flex items-center justify-center p-4 bg-slate-950/95 backdrop-blur-md">
+        <div class="bg-slate-800 border border-slate-700 w-full max-w-md rounded-3xl p-8 shadow-2xl relative">
+            <button onclick="toggleModal('request-modal', false)" class="absolute top-6 right-6 text-slate-500 hover:text-white">
+                <i class="fas fa-times"></i>
+            </button>
+            <h3 class="text-xl font-bold mb-6 text-white">Demander un Code</h3>
             <div class="space-y-4">
                 <input type="text" id="reg-prenom" placeholder="Prénom" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 outline-none focus:border-emerald-500">
                 <input type="text" id="reg-nom" placeholder="Nom" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 outline-none focus:border-emerald-500">
                 <select id="reg-classe" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 outline-none focus:border-emerald-500">
                     <option value="">Sélectionnez votre classe</option>
-                    <option>6ème</option><option>5ème</option><option>4ème</option><option>3ème</option>
-                    <option>Seconde</option><option>Première</option><option>Terminale</option>
+                    <option>3ème</option><option>Terminale</option>
                 </select>
                 <button onclick="submitRequest()" class="w-full btn-gradient py-4 rounded-xl font-bold flex items-center justify-center gap-2">
-                    <i class="fab fa-whatsapp"></i> ENVOYER MA DEMANDE
+                    <i class="fab fa-whatsapp"></i> ENVOYER VIA WHATSAPP
                 </button>
             </div>
         </div>
     </div>
 
     <script>
+        // --- BASE DE DONNÉES ---
         const BD_ELEVES = {
             "a045b0230536ab45355f499b9c71b9ff1e13cd7b06a03fd287fa67b056d1f7e1": { nom: "QW1hZG91IFNvdw==", classe: "Terminale", actif: 1 },
-            "29611e5425bec3f5634af29b6abd1fe574c59a3e6c2c13557d0b73c1ac535665": { nom: "TW91c3NhIERpb3A=", classe: "3ème", actif: 1 }
+            "29611e5425bec3f5634af29b6abd1fe574c59a3e6c2c13557d0b73c1ac535665": { nom: "TW91c3NhIERpb3A=", classe: "3ème", actif: 0 },
+            "c0df92dfd732d810245c2aca11b4016b6a8145ab93eddf13bbe30a2a3427a88c": {nom: "QWxpb3UgU2Fycg==",classe: "Terminale", actif:0}
         };
 
         const BD_COURS = [
-                         { 
+             { 
                 titre: "🧠 Leç13 : (Partie 1/4)  LA PRESSION ARTERIELLE ET SA REGULATION",
                 classe: "Terminale",
                 icone: "fa-bolt",
                 objectifs: [
-"L’anatomie du cœur : ses cavités, ses valvules, sa paroi et la circulation coronaire.",
-"La structure du tissu cardiaque observé au microscope optique et électronique.",
-"Comment le myocarde fonctionne et pourquoi il obéit à la loi du tout ou rien",
-"Les premières clés pour comprendre la pression artérielle et sa régulation."
-],
+                    "L’anatomie du cœur : ses cavités, ses valvules, sa paroi et la circulation coronaire.",
+                    "La structure du tissu cardiaque observé au microscope optique et électronique.",
+                    "Comment le myocarde fonctionne et pourquoi il obéit à la loi du tout ou rien",
+                    "Les premières clés pour comprendre la pression artérielle et sa régulation."
+                ],
                 urlVid: "aHR0cHM6Ly95b3V0dS5iZS83eXJBMmJxcFpPUQ==",
                 urlPdf: "aHR0cHM6Ly9kcml2ZS5nb29nbGUuY29tL2ZpbGUvZC8xRlgtQU84TWpYSmxZTGhYckhYc0xuVGxqOXFJaFdGZy0vdmlldz91c3A9ZHJpdmVfbGluaw=="
             },
@@ -135,12 +200,12 @@
                 classe: "Terminale",
                 icone: "fa-bolt",
                 objectifs: [
-"Les manifestations directes : comment sentir les pulsations cardiaques et le pouls.",
-"Les bruits du cœur : à quoi correspondent les fameux « toum » et « tac » entendus au stéthoscope.",
-"L’observation indirecte : le principe de la cardiographie et l’analyse d’un cardiogramme.",
-"Le cycle cardiaque détaillé : systole auriculaire, systole ventriculaire, diastole générale.",
-"Pourquoi le cœur se repose plus longtemps qu’il ne travaille (durée des diastoles  systoles)."
-],
+                    "Les manifestations directes : comment sentir les pulsations cardiaques et le pouls.",
+                    "Les bruits du cœur : à quoi correspondent les fameux « toum » et « tac » entendus au stéthoscope.",
+                    "L’observation indirecte : le principe de la cardiographie et l’analyse d’un cardiogramme.",
+                    "Le cycle cardiaque détaillé : systole auriculaire, systole ventriculaire, diastole générale.",
+                    "Pourquoi le cœur se repose plus longtemps qu’il ne travaille (durée des diastoles / systoles)."
+                ],
                 urlVid: "aHR0cHM6Ly95b3V0dS5iZS9vcVJDODRQb1gxOA==",
                 urlPdf: "aHR0cHM6Ly9kcml2ZS5nb29nbGUuY29tL2ZpbGUvZC8xV0N3MzFGc0c2QjA5MXJJdFFXZjVYakUtUkg0d25Kai0vdmlldz91c3A9ZHJpdmVfbGluaw=="
             },
@@ -169,8 +234,77 @@
             }
         ];
 
-        const CONTACT_WA = "KzIyMTc3MTczMzM0Mg==";
+        const CONTACT_WA = "KzIyMTc3MTczMzM0Ng==";
+        let isUserAuthenticated = false;
+        let currentUserClass = null;
 
+        window.onload = function() {
+            renderCatalogue();
+        };
+
+        // --- FONCTIONS D'INTERFACE ---
+        function showAuth() {
+            toggleModal('auth-modal', true);
+        }
+
+        function toggleModal(id, show) {
+            document.getElementById(id).classList.toggle('hidden', !show);
+        }
+
+        function renderCatalogue() {
+            const grid = document.getElementById('courses-grid');
+            grid.innerHTML = '';
+            
+            const coursAffiche = isUserAuthenticated 
+                ? BD_COURS.filter(c => c.classe === currentUserClass)
+                : BD_COURS;
+
+            coursAffiche.forEach(cours => {
+                const card = document.createElement('div');
+                card.className = "glass rounded-3xl p-6 flex flex-col h-full animate-in relative overflow-hidden border border-white/5";
+                
+                if (!isUserAuthenticated) {
+                    card.innerHTML += `<div class="lock-indicator" onclick="showAuth()"><i class="fas fa-lock text-sm"></i></div>`;
+                }
+
+                card.innerHTML += `
+                    <div class="mb-4 flex justify-between items-center">
+                        <div class="w-10 h-10 bg-slate-800 rounded-xl flex items-center justify-center text-emerald-500">
+                            <i class="fas ${cours.icone}"></i>
+                        </div>
+                        <span class="text-[10px] font-bold px-2 py-1 bg-white/5 text-slate-400 rounded-md border border-white/10 uppercase tracking-widest">${cours.classe}</span>
+                    </div>
+                    
+                    <h3 class="text-xl font-bold text-white mb-4 leading-snug">${cours.titre}</h3>
+                    
+                    <div class="mb-6">
+                        <p class="text-emerald-500/80 text-[10px] font-black uppercase tracking-tighter mb-3">Objectifs Spécifiques :</p>
+                        <ul class="space-y-2">
+                            ${cours.objectifs.map((obj, i) => `
+                                <li class="text-slate-400 text-sm flex gap-3">
+                                    <span class="text-emerald-500 font-bold font-mono">${i+1}.</span>
+                                    <span>${obj}</span>
+                                </li>
+                            `).join('')}
+                        </ul>
+                    </div>
+
+                    <div class="mt-auto grid grid-cols-1 gap-3">
+                        <button onclick="${isUserAuthenticated ? `window.open(atob('${cours.urlVid}'), '_blank')` : 'showAuth()'}" 
+                            class="w-full py-3 bg-red-600/10 hover:bg-red-600 text-red-500 hover:text-white rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 ${!isUserAuthenticated ? 'locked-action' : ''}">
+                            <i class="fab fa-youtube"></i> VISIONNER LA VIDÉO
+                        </button>
+                        <button onclick="${isUserAuthenticated ? `window.open(atob('${cours.urlPdf}'), '_blank')` : 'showAuth()'}" 
+                            class="w-full py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 ${!isUserAuthenticated ? 'locked-action' : ''}">
+                            <i class="far fa-file-pdf"></i> TÉLÉCHARGER LE SUPPORT
+                        </button>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        // --- LOGIQUE AUTHENTIFICATION ---
         async function hashValue(str) {
             const buffer = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
             return Array.from(new Uint8Array(buffer)).map(b => b.toString(16).padStart(2, '0')).join('');
@@ -179,96 +313,77 @@
         async function handleLogin() {
             const inputField = document.getElementById('access-input');
             const input = inputField.value.trim().toUpperCase();
-            const reactivateBtn = document.getElementById('reactivate-btn');
+            const unpaidBox = document.getElementById('unpaid-msg-box');
             const unknownBtn = document.getElementById('unknown-code-btn');
+            const nameTarget = document.getElementById('unpaid-user-name');
             
             if (!input) return;
 
             const hashed = await hashValue(input);
             const eleve = BD_ELEVES[hashed];
 
-            reactivateBtn.classList.add('hidden');
+            // Reset UI alerts
+            unpaidBox.classList.add('hidden');
             unknownBtn.classList.add('hidden');
 
             if (eleve) {
                 if (eleve.actif === 1) {
-                    renderApp(eleve);
+                    successLogin(eleve);
                 } else {
-                    inputField.classList.add('error-shake');
-                    setTimeout(() => inputField.classList.remove('error-shake'), 400);
-                    reactivateBtn.classList.remove('hidden'); 
-                    alert("⚠️ ABONNEMENT EXPIRÉ\n\nVotre accès a été suspendu. Veuillez nous contacter pour réactiver votre compte.");
+                    // FONCTIONNALITÉ DEMANDÉE : Affichage du message de paiement
+                    triggerError(inputField);
+                    nameTarget.innerText = atob(eleve.nom);
+                    unpaidBox.classList.remove('hidden');
                 }
             } else {
-                inputField.classList.add('error-shake');
-                setTimeout(() => inputField.classList.remove('error-shake'), 400);
+                triggerError(inputField);
                 unknownBtn.classList.remove('hidden');
-                alert("❌ CODE INEXISTANT\n\nCe code n'est pas reconnu par notre système.");
             }
+        }
+
+        function triggerError(field) {
+            field.classList.add('error-shake');
+            setTimeout(() => field.classList.remove('error-shake'), 400);
+        }
+
+        function successLogin(eleve) {
+            isUserAuthenticated = true;
+            currentUserClass = eleve.classe;
+            const nomClair = atob(eleve.nom);
+            
+            toggleModal('auth-modal', false);
+            
+            // Mise à jour de l'UI
+            document.getElementById('nav-guest').classList.add('hidden');
+            document.getElementById('nav-info').classList.remove('hidden');
+            document.getElementById('user-tag').innerText = eleve.classe;
+            document.getElementById('header-welcome').innerHTML = `
+                <h2 class="text-4xl font-black text-white mb-2">Bienvenue, ${nomClair}</h2>
+                <p class="text-emerald-500 font-bold uppercase tracking-widest text-sm">Contenus pour la classe de ${eleve.classe}</p>
+            `;
+
+            renderCatalogue();
+            window.scrollTo({top: 0, behavior: 'smooth'});
         }
 
         function sendReactivationRequest() {
             const code = document.getElementById('access-input').value.trim().toUpperCase();
-            const msg = `Bonjour Sénégal Académie,\n\nMon abonnement a expiré. Je souhaite le réactiver.\n\nMon code actuel est : ${code}`;
+            const msg = `Bonjour Sénégal Académie, mon abonnement (${code}) est en attente de paiement. Je souhaite payer 500 FCFA via Wave pour l'activer.`;
             window.open(`https://wa.me/${atob(CONTACT_WA).replace('+', '')}?text=${encodeURIComponent(msg)}`, '_blank');
-        }
-
-        function renderApp(eleve) {
-            const nomClair = atob(eleve.nom);
-            document.getElementById('auth-section').classList.add('hidden');
-            document.getElementById('course-section').classList.remove('hidden');
-            document.getElementById('nav-info').classList.remove('hidden');
-            document.getElementById('welcome-title').innerText = `Bonjour, ${nomClair}`;
-            document.getElementById('class-subtitle').innerText = `Classe : ${eleve.classe}`;
-            document.getElementById('user-tag').innerText = eleve.classe;
-            const container = document.getElementById('courses-container');
-            container.innerHTML = '';
-            
-            BD_COURS.filter(c => c.classe === eleve.classe).forEach(cours => {
-                const card = document.createElement('div');
-                card.className = "lesson-card glass rounded-3xl p-6 flex flex-col h-full";
-                card.innerHTML = `
-                    <div class="mb-4 flex justify-between items-start">
-                        <div class="w-12 h-12 bg-slate-800 rounded-2xl flex items-center justify-center text-emerald-400"><i class="fas ${cours.icone} text-xl"></i></div>
-                    </div>
-                    <h3 class="text-xl font-bold text-white mb-4">${cours.titre}</h3>
-                    
-                    <div class="mb-6">
-                        <p class="text-emerald-400 text-xs font-bold uppercase tracking-widest mb-2">Objectifs de la leçon :</p>
-                        <ol class="space-y-2">
-                            ${cours.objectifs.map((obj, index) => `
-                                <li class="text-slate-400 text-sm flex gap-2">
-                                    <span class="text-emerald-500 font-bold">${index + 1}.</span>
-                                    <span>${obj}</span>
-                                </li>
-                            `).join('')}
-                        </ol>
-                    </div>
-
-                    <div class="mt-auto space-y-3">
-                        <button onclick="window.open(atob('${cours.urlVid}'), '_blank')" class="w-full py-3 bg-red-600/10 hover:bg-red-600 text-red-500 hover:text-white rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-all"><i class="fab fa-youtube"></i> VIDÉO</button>
-                        <button onclick="window.open(atob('${cours.urlPdf}'), '_blank')" class="w-full py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-all"><i class="far fa-file-pdf"></i> SUPPORT</button>
-                    </div>`;
-                container.appendChild(card);
-            });
         }
 
         function submitRequest() {
             const p = document.getElementById('reg-prenom').value;
             const n = document.getElementById('reg-nom').value;
             const c = document.getElementById('reg-classe').value;
-            if(!p || !n || !c) return alert("Champs incomplets.");
-            const msg = `Bonjour Sénégal Académie, je suis ${p} ${n} en ${c}. Je souhaite obtenir un code d'accès.`;
+            if(!p || !n || !c) return alert("Veuillez remplir tous les champs.");
+            const msg = `Bonjour Sénégal Académie, je suis ${p} ${n} en ${c}. Je souhaite commander un code d'accès.`;
             window.open(`https://wa.me/${atob(CONTACT_WA).replace('+', '')}?text=${encodeURIComponent(msg)}`, '_blank');
             toggleModal('request-modal', false);
         }
 
-        function toggleModal(id, show) {
-            document.getElementById(id).classList.toggle('hidden', !show);
-        }
-
+        // Sécurité
         document.addEventListener('keydown', e => { if ((e.ctrlKey && ['s','u','i'].includes(e.key)) || e.key === 'F12') e.preventDefault(); });
-        setInterval(() => console.clear(), 2000);
     </script>
 </body>
 </html>
