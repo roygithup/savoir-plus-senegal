@@ -3,392 +3,427 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sénégal Académie - Excellence en SVT</title>
+    <title>SVT Excellence | Réussir pour 1000F</title>
+    
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Plus Jakarta Sans', 'sans-serif'] },
+                    colors: {
+                        brand: {
+                            50: '#eff6ff', 100: '#dbeafe', 200: '#bfdbfe', 
+                            500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8', 900: '#1e3a8a'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
     <style>
-        :root { --primary: #10b981; --dark-bg: #0f172a; }
-        body { background-color: var(--dark-bg); color: #f8fafc; font-family: 'Inter', system-ui, sans-serif; user-select: none; scroll-behavior: smooth; }
-        .glass { background: rgba(30, 41, 59, 0.7); backdrop-blur: 12px; border: 1px solid rgba(255, 255, 255, 0.1); }
-        .btn-gradient { background: linear-gradient(135deg, #10b981 0%, #059669 100%); transition: all 0.3s; }
-        .btn-gradient:hover { filter: brightness(1.1); transform: scale(1.02); }
-        .hidden { display: none !important; }
-        
-        /* Styles pour les éléments verrouillés */
-        .lock-indicator { 
-            position: absolute; 
-            top: 1rem; 
-            right: 1rem; 
-            color: #10b981; 
-            background: rgba(16, 185, 129, 0.1);
-            padding: 8px;
-            border-radius: 50%;
-            animation: pulse 2s infinite;
-            cursor: pointer;
-        }
-        
-        .locked-action {
-            position: relative;
-            overflow: hidden;
-            filter: grayscale(0.5);
-            cursor: not-allowed;
-        }
-
-        .locked-action::after {
-            content: "\f023";
-            font-family: "Font Awesome 5 Free";
-            font-weight: 900;
-            position: absolute;
-            right: 15px;
-            top: 50%;
-            transform: translateY(-50%);
-            font-size: 0.8rem;
-        }
-
-        @keyframes pulse { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.1); opacity: 0.7; } }
-        @keyframes slideIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-        .animate-in { animation: slideIn 0.6s ease-out forwards; }
-        
-        .error-shake { animation: shake 0.4s ease-in-out; border-color: #ef4444 !important; }
-        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-10px); } 75% { transform: translateX(10px); } }
+        .glass-nav { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(226, 232, 240, 0.8); }
+        .course-card { transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+        .course-card:hover { transform: translateY(-8px); box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.15); }
+        .shimmer { background: linear-gradient(90deg, #f0f0f0 25%, #f8f8f8 50%, #f0f0f0 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; }
+        @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+        .scale-in { animation: scaleIn 0.3s ease-out; }
+        @keyframes scaleIn { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        .text-gradient { background: linear-gradient(to right, #2563eb, #7c3aed); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
     </style>
 </head>
-<body oncontextmenu="return false;">
+<body class="bg-[#F8FAFC] text-slate-900 min-h-screen font-sans antialiased">
 
     <!-- NAVIGATION -->
-    <nav class="glass sticky top-0 z-50 p-4 border-b border-slate-800">
-        <div class="max-w-7xl mx-auto flex justify-between items-center">
-            <div class="flex items-center gap-2 cursor-pointer" onclick="location.reload()">
-                <div class="w-8 h-8 bg-emerald-500 rounded-lg flex items-center justify-center shadow-lg">
-                    <i class="fas fa-book-open text-white text-sm"></i>
+    <nav class="glass-nav sticky top-0 z-50 px-6 py-4">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+            <div class="flex items-center gap-2 cursor-pointer" onclick="window.location.reload()">
+                <div class="bg-brand-600 p-2 rounded-xl text-white shadow-lg shadow-brand-200">
+                    <i class="fas fa-dna text-xl"></i>
                 </div>
-                <h1 class="text-xl font-black tracking-tighter bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">
-                    SÉNÉGAL ACADÉMIE
-                </h1>
+                <span class="text-xl font-extrabold tracking-tight text-brand-900">SVT<span class="text-brand-600">Excellence</span></span>
             </div>
-            <div id="nav-info" class="hidden flex items-center gap-4">
-                <span id="user-tag" class="text-xs font-bold px-3 py-1 bg-emerald-500/10 text-emerald-400 rounded-full border border-emerald-500/20"></span>
-                <button onclick="location.reload()" class="text-slate-400 hover:text-white transition-colors">
-                    <i class="fas fa-sign-out-alt"></i>
-                </button>
-            </div>
-            <div id="nav-guest">
-                <button onclick="showAuth()" class="text-emerald-400 font-bold text-sm border border-emerald-500/30 px-4 py-2 rounded-xl hover:bg-emerald-500/10 transition-all">
-                    CONNEXION
-                </button>
+
+            <div class="flex items-center gap-4">
+                <div id="navAuthButtons" class="flex items-center gap-2">
+                    <button onclick="showAuthModal('login')" class="text-slate-600 font-bold text-sm hover:text-brand-600 px-4 py-2 transition">Connexion</button>
+                    <button onclick="showAuthModal('signup')" class="bg-brand-600 text-white px-6 py-2.5 rounded-xl font-bold text-sm shadow-xl shadow-brand-100 hover:bg-brand-700 transition transform hover:scale-105 active:scale-95">S'inscrire (C'est gratuit)</button>
+                </div>
+                <div id="navUserDisplay" class="hidden flex items-center gap-3">
+                    <div class="flex items-center gap-2 bg-slate-100 px-3 py-1.5 rounded-xl border border-slate-200">
+                        <div class="w-6 h-6 rounded-full bg-brand-600 text-white flex items-center justify-center text-[10px] font-bold" id="userInitialNav">?</div>
+                        <span id="userNameNav" class="text-xs font-bold text-slate-700 max-w-[100px] truncate">Utilisateur</span>
+                    </div>
+                    <button onclick="logout()" class="text-red-500 hover:bg-red-50 w-10 h-10 flex items-center justify-center rounded-xl transition border border-red-100"><i class="fas fa-sign-out-alt"></i></button>
+                </div>
             </div>
         </div>
     </nav>
 
-    <!-- ENTÊTE ACCUEIL -->
-    <header id="header-welcome" class="max-w-7xl mx-auto px-6 pt-16 pb-8 text-center animate-in">
-        <h2 class="text-4xl md:text-6xl font-black text-white mb-4 leading-tight">
-            Votre Réussite commence <span class="text-emerald-500">Ici</span>
-        </h2>
-        <div class="text-slate-400 max-w-2xl mx-auto mb-8 space-y-4">
-            <p>Accédez facilement à nos cours de SVT clairs et efficaces. Chaque chapitre indique ses objectifs pour aller droit à l’essentiel.</p>
-            <div class="flex justify-center gap-6 text-sm font-bold text-emerald-400">
-                <span><i class="fas fa-video mr-2"></i>Vidéos</span>
-                <span><i class="fas fa-file-pdf mr-2"></i>Supports</span>
-                <span><i class="fas fa-bolt mr-2"></i>Révisions</span>
+    <!-- BANNIÈRE BIENVENUE -->
+    <div id="welcomeBanner" class="hidden bg-slate-900 text-white py-4 px-6 border-b border-white/10">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-4">
+                <div class="w-12 h-12 rounded-2xl bg-brand-600 flex items-center justify-center font-black text-white shadow-lg shadow-brand-900/50" id="userInitial">U</div>
+                <div>
+                    <p class="text-xs text-slate-400 font-bold uppercase tracking-widest">Tableau de bord</p>
+                    <p class="font-extrabold text-lg" id="welcomeUserText">Nom de l'élève</p>
+                </div>
             </div>
-            <p class="text-white">Abonnement mensuel : <strong class="text-emerald-500 text-xl">5.000 FCFA</strong> seulement.</p>
-        </div>
-    </header>
-
-    <!-- CATALOGUE DES COURS -->
-    <section id="catalogue-section" class="max-w-7xl mx-auto px-6 pb-20">
-        <div id="courses-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <!-- Injecté par JS -->
-        </div>
-    </section>
-
-    <!-- MODAL DE CONNEXION / AUTH -->
-    <div id="auth-modal" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-950/90 backdrop-blur-md">
-        <div class="bg-slate-900 border border-slate-700 w-full max-w-md rounded-3xl p-8 shadow-2xl relative animate-in">
-            <button onclick="toggleModal('auth-modal', false)" class="absolute top-6 right-6 text-slate-500 hover:text-white">
-                <i class="fas fa-times text-xl"></i>
-            </button>
-            
-            <div class="text-center mb-8">
-                <h3 class="text-2xl font-bold text-white mb-2">Accès Sécurisé</h3>
-                <p class="text-slate-400 text-sm">Entrez votre code pour déverrouiller ce contenu</p>
-            </div>
-
-            <div class="space-y-4">
-                <div class="relative">
-                    <i class="fas fa-key absolute left-4 top-1/2 -translate-y-1/2 text-slate-500"></i>
-                    <input type="text" id="access-input" placeholder="VOTRE CODE" 
-                        class="w-full bg-slate-950 border border-slate-800 rounded-2xl p-4 pl-12 text-center tracking-widest font-mono text-emerald-400 focus:ring-2 focus:ring-emerald-500 outline-none transition-all">
-                </div>
-                
-                <button onclick="handleLogin()" class="w-full btn-gradient text-white font-bold py-4 rounded-2xl shadow-lg active:scale-95">
-                    DÉVERROUILLER
-                </button>
-
-                <!-- Zone de message pour abonnement non payé -->
-                <div id="unpaid-msg-box" class="hidden bg-amber-500/10 border border-amber-500/30 rounded-2xl p-5 text-center animate-in">
-                    <p class="text-amber-400 font-bold text-lg mb-1" id="unpaid-user-name"></p>
-                    <p class="text-white text-sm mb-3 font-semibold">Code valide ✅ — Abonnement non payé ❌</p>
-                    <p class="text-slate-300 text-xs leading-relaxed mb-4">
-                        Envoyez un message WhatsApp pour payer 500 FCFA via Wave.<br>
-                        Activation du code dans l’heure.
-                    </p>
-                    <button onclick="sendReactivationRequest()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 rounded-xl transition-all flex items-center justify-center gap-2">
-                        <i class="fab fa-whatsapp"></i> PAYER VIA WHATSAPP
-                    </button>
-                </div>
-
-                <div id="auth-alerts" class="space-y-3">
-                    <button id="unknown-code-btn" onclick="toggleModal('request-modal', true); toggleModal('auth-modal', false)" class="hidden w-full bg-red-500/10 hover:bg-red-500/20 text-red-500 border border-red-500/30 font-bold py-4 rounded-2xl transition-all flex items-center justify-center gap-2">
-                        <i class="fas fa-user-plus"></i> CODE INEXISTANT : DEMANDER
-                    </button>
-                </div>
-
-                <button onclick="toggleModal('request-modal', true); toggleModal('auth-modal', false)" class="w-full py-2 text-slate-400 hover:text-white text-xs transition-colors underline">
-                    Je n'ai pas encore de code d'accès
-                </button>
+            <div class="bg-white/5 px-6 py-3 rounded-2xl text-sm italic text-slate-300 border border-white/10 flex items-center gap-4 max-w-xl">
+                <i class="fas fa-quote-left text-brand-500 opacity-50"></i>
+                <span id="motivationQuote">Chargement de votre dose de motivation...</span>
             </div>
         </div>
     </div>
 
-    <!-- MODAL DE DEMANDE D'ACCÈS -->
-    <div id="request-modal" class="hidden fixed inset-0 z-[110] flex items-center justify-center p-4 bg-slate-950/95 backdrop-blur-md">
-        <div class="bg-slate-800 border border-slate-700 w-full max-w-md rounded-3xl p-8 shadow-2xl relative">
-            <button onclick="toggleModal('request-modal', false)" class="absolute top-6 right-6 text-slate-500 hover:text-white">
+    <!-- HERO SECTION -->
+    <header class="bg-white border-b border-slate-100 px-6 py-16 relative overflow-hidden">
+        <div class="absolute top-0 right-0 -mr-24 -mt-24 w-96 h-96 bg-brand-50 rounded-full blur-[120px] opacity-60"></div>
+        <div class="absolute bottom-0 left-0 -ml-24 -mb-24 w-64 h-64 bg-purple-50 rounded-full blur-[100px] opacity-40"></div>
+        
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-12 relative z-10">
+            <div class="max-w-2xl text-center md:text-left">
+                <div class="inline-flex items-center gap-2 bg-emerald-50 text-emerald-700 px-4 py-2 rounded-full text-xs font-black mb-6 border border-emerald-100 tracking-wider uppercase">
+                    <i class="fas fa-gift"></i>
+                    L'inscription est totalement gratuite
+                </div>
+                <h1 class="text-4xl md:text-6xl font-black text-slate-900 mb-6 leading-[1.15]">
+                    Vise le <span class="text-gradient">20/20</span> en SVT pour seulement <span class="underline decoration-brand-500 decoration-4 underline-offset-8">1000F</span>
+                </h1>
+                <p class="text-slate-600 text-lg md:text-xl mb-8 leading-relaxed font-medium">
+                    Pourquoi rester dans le doute ? Accède aux cours, vidéos et schémas qui font la différence entre un élève moyen et l'élite.
+                </p>
+                
+                <div class="flex flex-col sm:flex-row items-center gap-4 justify-center md:justify-start">
+                    <div class="p-5 bg-white rounded-3xl border border-slate-200 shadow-xl flex items-center gap-5 group hover:border-brand-300 transition-colors">
+                        <div class="w-12 h-12 bg-brand-600 text-white rounded-2xl flex items-center justify-center text-xl shadow-lg shadow-brand-200">
+                            <i class="fas fa-crown"></i>
+                        </div>
+                        <div class="text-left">
+                            <div class="text-2xl font-black text-slate-900 leading-none">1000F <span class="text-sm font-bold text-slate-400">/ mois</span></div>
+                            <div class="text-[11px] font-bold text-brand-600 uppercase tracking-tighter mt-1">Garantie ton succès au BAC/BFEM</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="w-full md:w-auto bg-slate-50 p-6 rounded-[2.5rem] border border-slate-200 shadow-inner">
+                <div class="flex flex-col gap-3 min-w-[280px]">
+                    <div class="relative mb-2">
+                        <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                        <input type="text" id="searchInput" placeholder="Chercher une leçon..." class="w-full pl-12 pr-4 py-3 bg-white border border-slate-200 rounded-2xl focus:ring-2 focus:ring-brand-500 outline-none transition font-bold text-sm shadow-sm">
+                    </div>
+                    <div class="flex flex-col gap-2" id="filterContainer">
+                        <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 ml-2">Ta Classe</p>
+                        <div class="grid grid-cols-2 gap-2">
+                            <button data-filter="all" class="filter-btn py-3 rounded-2xl font-bold transition-all bg-brand-600 text-white text-xs shadow-lg shadow-brand-100">Tous les cours</button>
+                            <button data-filter="free" class="filter-btn py-3 rounded-2xl font-bold transition-all bg-white text-emerald-600 border border-emerald-100 hover:bg-emerald-50 text-xs shadow-sm">Zone Gratuite</button>
+                            <button data-filter="Terminale" class="filter-btn py-3 rounded-2xl font-bold transition-all bg-white text-slate-600 border border-slate-200 hover:border-brand-300 text-xs shadow-sm">Terminale</button>
+                            <button data-filter="3ème" class="filter-btn py-3 rounded-2xl font-bold transition-all bg-white text-slate-600 border border-slate-200 hover:border-brand-300 text-xs shadow-sm">3ème</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- CONTENT -->
+    <main class="max-w-7xl mx-auto px-6 py-16">
+        <div id="statusContainer" class="hidden text-center py-20">
+            <div id="loader" class="hidden flex flex-col items-center">
+                <div class="w-16 h-16 border-4 border-brand-100 border-t-brand-600 rounded-full animate-spin"></div>
+                <p class="mt-4 font-bold text-slate-400">Préparation de vos cours...</p>
+            </div>
+            <div id="noResults" class="hidden text-slate-400">
+                <div class="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <i class="fas fa-search text-2xl"></i>
+                </div>
+                <h3 class="text-2xl font-black text-slate-800">Rien à l'horizon</h3>
+                <p class="font-medium mt-2">Essaie une autre recherche ou change de niveau.</p>
+            </div>
+        </div>
+
+        <div id="coursesGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+            <!-- Loading Skeletons -->
+            <div class="shimmer h-[400px] rounded-[2.5rem] opacity-40"></div>
+            <div class="shimmer h-[400px] rounded-[2.5rem] opacity-40"></div>
+            <div class="shimmer h-[400px] rounded-[2.5rem] opacity-40"></div>
+        </div>
+    </main>
+
+    <!-- MODAL AUTH -->
+    <div id="authModal" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-6 bg-slate-900/80 backdrop-blur-md">
+        <div class="bg-white rounded-[2.5rem] p-10 max-w-md w-full shadow-2xl scale-in relative max-h-[90vh] overflow-y-auto">
+            <button onclick="closeAuthModal()" class="absolute top-8 right-8 text-slate-400 hover:text-slate-900 transition h-10 w-10 flex items-center justify-center bg-slate-50 rounded-xl">
                 <i class="fas fa-times"></i>
             </button>
-            <h3 class="text-xl font-bold mb-6 text-white">Demander un Code</h3>
-            <div class="space-y-4">
-                <input type="text" id="reg-prenom" placeholder="Prénom" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 outline-none focus:border-emerald-500">
-                <input type="text" id="reg-nom" placeholder="Nom" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 outline-none focus:border-emerald-500">
-                <select id="reg-classe" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 outline-none focus:border-emerald-500">
-                    <option value="">Sélectionnez votre classe</option>
-                    <option>3ème</option><option>Terminale</option>
-                </select>
-                <button onclick="submitRequest()" class="w-full btn-gradient py-4 rounded-xl font-bold flex items-center justify-center gap-2">
-                    <i class="fab fa-whatsapp"></i> ENVOYER VIA WHATSAPP
+            
+            <div class="text-center mb-10">
+                <div id="authIconBox" class="w-20 h-20 bg-brand-50 text-brand-600 rounded-3xl flex items-center justify-center text-3xl mx-auto mb-6 shadow-inner">
+                    <i id="authIcon" class="fas fa-user-graduate"></i>
+                </div>
+                <h2 id="authTitle" class="text-3xl font-black text-slate-900 leading-tight">Accès Elève</h2>
+                <p id="authSubtitle" class="text-slate-500 mt-2 font-medium italic">L'excellence commence ici.</p>
+            </div>
+
+            <form id="authForm" onsubmit="handleAuth(event)" class="space-y-5">
+                <div id="signupFields" class="hidden space-y-5">
+                    <div class="bg-emerald-50 border border-emerald-100 p-4 rounded-2xl mb-4">
+                        <p class="text-[11px] text-emerald-700 font-black uppercase tracking-widest text-center">🎉 Inscription 100% Gratuite</p>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-black text-slate-500 uppercase tracking-widest mb-2 ml-1">Ton Nom Complet</label>
+                        <input type="text" id="regFullName" placeholder="Moussa Diop" class="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-brand-500 outline-none transition font-bold">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-black text-slate-500 uppercase tracking-widest mb-2 ml-1">Ta Classe</label>
+                        <select id="regClasse" class="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-brand-500 outline-none transition font-bold appearance-none">
+                            <option value="">Sélectionne ton niveau</option>
+                            <option value="Terminale">Terminale</option>
+                            <option value="3ème">3ème</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div id="loginFields">
+                    <div>
+                        <label class="block text-xs font-black text-slate-500 uppercase tracking-widest mb-3 text-center">Ton ID d'accès (4 caractères)</label>
+                        <input type="text" id="loginID" maxlength="4" placeholder="ABCD" class="w-full px-5 py-6 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-brand-500 outline-none transition uppercase text-center text-3xl font-black tracking-[0.5em] shadow-inner text-brand-600">
+                    </div>
+                </div>
+                
+                <button type="submit" id="authSubmitBtn" class="w-full py-5 bg-brand-600 text-white rounded-[1.5rem] font-black shadow-2xl shadow-brand-200 hover:bg-brand-700 transition transform hover:-translate-y-1 active:translate-y-0 flex items-center justify-center gap-3">
+                    <span id="authBtnLabel">Se connecter</span>
+                    <i class="fas fa-rocket text-sm"></i>
                 </button>
+            </form>
+
+            <div class="mt-8 pt-8 border-t border-slate-100 text-center">
+                <p class="text-sm font-bold text-slate-400">
+                    <span id="authFooterText">Pas encore de compte ?</span>
+                    <button onclick="toggleAuthMode()" id="authFooterBtn" class="text-brand-600 font-black hover:underline ml-1">S'inscrire gratuitement</button>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL PREMIUM / WHATSAPP -->
+    <div id="premiumModal" class="hidden fixed inset-0 z-[110] flex items-center justify-center p-6 bg-brand-900/90 backdrop-blur-lg">
+        <div class="bg-white rounded-[3rem] p-10 max-w-md w-full shadow-2xl scale-in border border-white/20">
+            <div id="premiumIconContainer" class="w-20 h-20 bg-amber-50 text-amber-600 rounded-3xl flex items-center justify-center text-3xl mb-8 shadow-inner border border-amber-100 mx-auto">
+                <i class="fas fa-crown"></i>
+            </div>
+            <h2 id="premiumModalTitle" class="text-3xl font-black text-slate-900 mb-4 text-center">Prêt pour l'Excellence ?</h2>
+            <p id="premiumModalMsg" class="text-slate-600 mb-10 leading-relaxed text-center font-medium">
+                Cette leçon va transformer tes résultats. Pour seulement <span class="font-black text-brand-600">1000F</span>, accède à tout le contenu Premium pendant 30 jours.
+            </p>
+            <div class="space-y-4">
+                <button id="premiumWhatsappBtn" onclick="contactAdmin()" class="w-full py-5 bg-brand-600 text-white rounded-[1.5rem] font-black shadow-xl shadow-brand-300 hover:bg-brand-700 transition flex items-center justify-center gap-3">
+                    <i class="fab fa-whatsapp text-xl"></i>
+                    <span>Activer pour 1000F / mois</span>
+                </button>
+                <button onclick="closePremiumModal()" class="w-full py-4 bg-slate-50 text-slate-400 rounded-[1.2rem] font-bold hover:bg-slate-100 transition">Peut-être plus tard</button>
             </div>
         </div>
     </div>
 
     <script>
-        // --- BASE DE DONNÉES ---
-        const BD_ELEVES = {
-            "a045b0230536ab45355f499b9c71b9ff1e13cd7b06a03fd287fa67b056d1f7e1": { nom: "QW1hZG91IFNvdw==", classe: "Terminale", actif: 1 },
-            "29611e5425bec3f5634af29b6abd1fe574c59a3e6c2c13557d0b73c1ac535665": { nom: "TW91c3NhIERpb3A=", classe: "3ème", actif: 0 },
-            "c0df92dfd732d810245c2aca11b4016b6a8145ab93eddf13bbe30a2a3427a88c": {nom: "QWxpb3UgU2Fycg==",classe: "Terminale", actif:0},
-            "4d7c6402811134631a688a6a3744f538ed8db21f923eede67bb34698cfaecaae": {nom:  "UmFtYSBUaGlhbSA=",classe: "Terminale", actif:0},
-            "df29ee7ce5e242233e6b2c23351a1241fd8564420e48b13889a985bff37bd49c": {nom:  "QXdhIE1BUg==",classe: "Terminale", actif:0},
-            "f0514252e729aadcf0a396fa91ef40a2f1381881e3f3732693ced64e3652863b": {nom:  "TWFraHRhciBHQVlF",classe: "Terminale", actif:0}
-        };
+        // CONFIGURATION
+        const SUPABASE_URL = 'https://nqbyxogfvkmluakwmkmu.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_k5N9blQJIBSj2lW75GckOQ_CrLBqF9N'; 
+        
+        // Initialisation de Supabase (correction de la double déclaration)
+        const sbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        const ADMIN_PHONE = "221768776668";
 
-        const BD_COURS = [
-             { 
-                titre: "🧠 Leç13 : (Partie 1/4)  LA PRESSION ARTERIELLE ET SA REGULATION",
-                classe: "Terminale",
-                icone: "fa-bolt",
-                objectifs: [
-                    "L’anatomie du cœur : ses cavités, ses valvules, sa paroi et la circulation coronaire.",
-                    "La structure du tissu cardiaque observé au microscope optique et électronique.",
-                    "Comment le myocarde fonctionne et pourquoi il obéit à la loi du tout ou rien",
-                    "Les premières clés pour comprendre la pression artérielle et sa régulation."
-                ],
-                urlVid: "aHR0cHM6Ly9lZHVjYXRpb25zbnRlc3QtbXkuc2hhcmVwb2ludC5jb20vOnY6L2cvcGVyc29uYWwvc2lyZV9kZW1lX2VkdWNhdGlvbl9zbi9JUUF4VEhuSTdweUtSN1VwVDZCRld5N2pBVVd2azZuZHc5RDlHN3hpXzhoS2QyZz9lPXNIUVNCUw==",
-                urlPdf: "aHR0cHM6Ly9kcml2ZS5nb29nbGUuY29tL2ZpbGUvZC8xRlgtQU84TWpYSmxZTGhYckhYc0xuVGxqOXFJaFdGZy0vdmlldz91c3A9ZHJpdmVfbGluaw=="
-            },
-             { 
-                titre: "🧠 Leç13 : (Partie 2/4)  LA PRESSION ARTERIELLE ET SA REGULATION (Pouls, Bruits)",
-                classe: "Terminale",
-                icone: "fa-bolt",
-                objectifs: [
-                    "Les manifestations directes : comment sentir les pulsations cardiaques et le pouls.",
-                    "Les bruits du cœur : à quoi correspondent les fameux « toum » et « tac » entendus au stéthoscope.",
-                    "L’observation indirecte : le principe de la cardiographie et l’analyse d’un cardiogramme.",
-                    "Le cycle cardiaque détaillé : systole auriculaire, systole ventriculaire, diastole générale.",
-                    "Pourquoi le cœur se repose plus longtemps qu’il ne travaille (durée des diastoles / systoles)."
-                ],
-                urlVid: "aHR0cHM6Ly9lZHVjYXRpb25zbnRlc3QtbXkuc2hhcmVwb2ludC5jb20vOnY6L2cvcGVyc29uYWwvc2lyZV9kZW1lX2VkdWNhdGlvbl9zbi9JUUFZeENxc0VVZUNRYnBUOWd0cEMzOUhBWkpGYnk2b2NQVlFVRzhtYl9UcVBNND9lPTJXQkRIcQ==",
-                urlPdf: "aHR0cHM6Ly9kcml2ZS5nb29nbGUuY29tL2ZpbGUvZC8xV0N3MzFGc0c2QjA5MXJJdFFXZjVYakUtUkg0d25Kai0vdmlldz91c3A9ZHJpdmVfbGluaw=="
-            },
-            {
-                titre: "🧠 Chapitre 13 (Partie 3/4)– La Pression Artérielle et sa Régulation : Le Contrôle Nerveux du Cœur",
-                classe: "Terminale",
-                icone: "fa-bolt",
-                objectifs: [
-                    "Comprendre le rôle des barorécepteurs et chémorécepteurs",
-                    "Identifier les centres nerveux régulateurs dans le bulbe rachidien",
-                    "Distinguer les nerfs sensitifs (Hering, Cyon, X) des nerfs moteurs"
-                ],
-                urlVid: "aHR0cHM6Ly9lZHVjYXRpb25zbnRlc3QtbXkuc2hhcmVwb2ludC5jb20vOnY6L2cvcGVyc29uYWwvc2lyZV9kZW1lX2VkdWNhdGlvbl9zbi9JUUF4VEhuSTdweUtSN1VwVDZCRld5N2pBVVd2azZuZHc5RDlHN3hpXzhoS2QyZz9lPXNIUVNCUw==",
-                urlPdf: "aHR0cHM6Ly9kcml2ZS5nb29nbGUuY29tL2ZpbGUvZC8xUkNjaHVTc0FhYmdBbkp3QjhtNGVpamZFTU9naUUybVEvdmlldz91c3A9ZHJpdmVfbGluaw=="
-            },
-            {
-                titre: "Chapitre 13 (Partie 4/4) – Pression Artérielle : Variations & Mécanismes de Régulation",
-                classe: "Terminale",
-                icone: "fa-chart-line",
-                objectifs: [
-                    "Analyser les différents facteurs de variation de la pression artérielle",
-                    "Maîtriser le principe de mesure avec le brassard et le stéthoscope"
-                ],
-                urlVid: "aHR0cHM6Ly93d3cueW91dHViZS5jb20vd2F0Y2g/dj1xMUpYNTYzOThBcw==",
-                urlPdf: "aHR0cHM6Ly9kcml2ZS5nb29nbGUuY29tL2ZpbGUvZC8xVWViSDVRNXRpRTZNa2gtWUVqMVFPY092Z19qTVZzcGUvdmlldz91c3A9ZHJpdmVfbGluaw=="
-            },
-            {
-    titre: "🧬 Leçon 14 : COMPOSITION ET RÔLES DU MILIEU INTÉRIEUR",
-    classe: "Terminale",
-    icone: "fa-heartbeat",
-    objectifs: [
-        "Définir clairement la notion de milieu intérieur selon Claude Bernard.",
-        "Identifier les différents compartiments liquidiens de l’organisme : sang, liquide interstitiel et lymphe.",
-        "Distinguer le liquide intracellulaire du liquide extracellulaire.",
-        "Comprendre la composition chimique du milieu intérieur (eau, sels minéraux, protéines, nutriments, déchets).",
-        "Expliquer le rôle du milieu intérieur dans le transport de l’oxygène, des nutriments et des déchets.",
-        "Comprendre le rôle du milieu intérieur dans la défense immunitaire de l’organisme.",
-        "Montrer que le milieu intérieur est un milieu intermédiaire indispensable entre les cellules et le sang.",
-        "Relier le milieu intérieur à la notion fondamentale d’homéostasie."
-    ],
-    urlVid: "aHR0cHM6Ly95b3V0dS5iZS81OXc3WlJZNGdOWQ==",
-    urlPdf: ""
-},
-            {
-    titre: "⚖️ Leçon 15 : RÉGULATION DE LA CONSTANCE DU MILIEU INTÉRIEUR (HOMÉOSTASIE)",
-    classe: "Terminale",
-    icone: "fa-balance-scale",
-    objectifs: [
-        "Définir la notion d’homéostasie et expliquer son importance pour la survie des cellules.",
-        "Montrer que le milieu intérieur subit des perturbations tout en conservant une stabilité relative.",
-        "Identifier les variations du pH du milieu intérieur : acidose et alcalose.",
-        "Expliquer les causes et les conséquences physiologiques de l’acidose et de l’alcalose.",
-        "Décrire le rôle des systèmes tampons biologiques dans la régulation du pH sanguin.",
-        "Expliquer la régulation du pH par les reins et les poumons.",
-        "Définir la pression osmotique du milieu intérieur et identifier son",
-        "Expliquer le rôle de la diurèse dans le maintien de la pression osmotique.",
-        "Analyser les conséquences d’une augmentation ou d’une diminution de la pression osmotique sur les cellules.",
-        "Expliquer la régulation hormonale de la pression osmotique par l’ADH.",
-        "Montrer le rôle de l’aldostérone dans la régulation de la balance sodique.",
-        "Conclure sur le rôle central des reins et des poumons dans le maintien de l’homéostasie."
-    ],
-    urlVid: "aHR0cHM6Ly9lZHVjYXRpb25zbnRlc3QtbXkuc2hhcmVwb2ludC5jb20vOnY6L2cvcGVyc29uYWwvc2lyZV9kZW1lX2VkdWNhdGlvbl9zbi9JUUQ2UUpNdmtoYUhUWUlsSWNzWF94Z2ZBWW5jT01CTDNYbW14dTQzdFk4ZkdXMD9lPXZmYnpsQQ==",
-    urlPdf: ""
-},
-      {
-    titre: "🍬 Leçon 16 : RÉGULATION DE LA GLYCÉMIE",
-    classe: "Terminale",
-    icone: "fa-tint",
-    objectifs: [
-        "Définir la glycémie et donner sa valeur moyenne normale chez l’Homme.",
-        "Identifier les variations physiologiques de la glycémie selon l’alimentation, le jeûne et l’effort physique.",
-        "Distinguer hyperglycémie et hypoglycémie et préciser leurs causes.",
-        "Mettre en évidence l’existence d’une régulation de la glycémie à partir d’expériences physiologiques.",
-        "Montrer le rôle essentiel du foie dans la régulation de la glycémie (glycogénogenèse et glycogénolyse).",
-        "Expliquer le rôle modérateur des reins dans la régulation de la glycémie (glycosurie).",
-        "Décrire la structure du pancréas et distinguer ses fonctions endocrine et exocrine.",
-        "Expliquer le rôle hypoglycémiant de l’insuline et le rôle hyperglycémiant du glucagon.",
-        "Montrer le caractère antagoniste de l’insuline et du glucagon.",
-        "Identifier les autres hormones hyperglycémiantes (adrénaline, GH, ACTH).",
-        "Expliquer la régulation nerveuse de la glycémie par les voies orthosympathique et parasympathique.",
-        "Distinguer les deux formes de diabète : diabète insulino-dépendant et diabète insulino-résistant.",
-        "Conclure sur la glycémie comme constante biologique essentielle de l’homéostasie."
-    ],
-    urlVid: "",
-    urlPdf: ""
-},
-            {
-    titre: "🛡️ Leçon 17 : LE SYSTÈME IMMUNITAIRE",
-    classe: "Terminale",
-    icone: "fa-shield-virus",
-    objectifs: [
-        "Définir l’immunologie, l’immunité et le système immunitaire.",
-        "Expliquer la notion d’intégrité biologique de l’organisme.",
-        "Distinguer clairement le « soi » du « non soi » biologique à partir d’expériences de greffe.",
-        "Identifier les marqueurs majeurs du soi (CMH/HLA) et préciser leurs rôles.",
-        "Identifier les marqueurs mineurs du soi : groupes sanguins ABO et facteur Rhésus.",
-        "Expliquer les caractéristiques des groupes sanguins et les phénomènes d’agglutination.",
-        "Définir la notion de non soi et donner des exemples d’éléments reconnus comme étrangers.",
-        "Définir les notions d’antigène, d’épitope et d’anticorps.",
-        "Définir l’immunité et expliquer la nécessité de la reconnaissance du soi et du non soi.",
-        "Distinguer l’immunité naturelle de l’immunité acquise.",
-        "Décrire les différentes barrières de l’immunité naturelle (anatomiques, chimiques, biochimiques et écologiques).",
-        "Distinguer immunité acquise active et immunité acquise passive.",
-        "Identifier les organes du système immunitaire et préciser leurs rôles.",
-        "Distinguer organes lymphoïdes centraux et périphériques.",
-        "Identifier les principales cellules immunitaires et leur origine.",
-        "Décrire la maturation et l’immunocompétence des lymphocytes B et T.",
-        "Conclure sur le rôle fondamental du système immunitaire dans la défense et le maintien de l’intégrité de l’organisme."
-    ],
-    urlVid: "",
-    urlPdf: ""
-}
+        let allCourses = [];
+        let currentFilter = 'all';
+        let searchQuery = '';
+        let currentAuthMode = 'login';
+        let currentUser = JSON.parse(localStorage.getItem('svt_user_session')) || null;
 
-      
-
+        const quotes = [
+            "Le succès est la somme de petits efforts, répétés jour après jour.",
+            "En SVT, on n'apprend pas seulement des faits, on apprend à comprendre la vie.",
+            "Celui qui pose une question risque de passer pour un sot cinq minutes, celui qui n'en pose pas reste un sot toute sa vie.",
+            "L'intelligence, c'est la faculté d'adaptation.",
+            "Il n'y a pas de réussite sans travail acharné. Ton 1000F est un investissement, pas une dépense.",
+            "Ton cerveau est ton meilleur allié, nourris-le d'Excellence."
         ];
 
-        const CONTACT_WA = "KzIyMTc2ODc3NjY2OA==";
-        let isUserAuthenticated = false;
-        let currentUserClass = null;
-
-        window.onload = function() {
-            renderCatalogue();
-        };
-
-        // --- FONCTIONS D'INTERFACE ---
-        function showAuth() {
-            toggleModal('auth-modal', true);
+        // INITIALISATION
+        async function init() {
+            updateUIForUser();
+            showStatus('loader');
+            try {
+                const { data, error } = await sbClient.from('cours').select('*, cours_objectifs(*)');
+                if (error) throw error;
+                allCourses = data || [];
+                render();
+            } catch (err) {
+                console.error("Erreur chargement cours:", err);
+                showStatus('noResults');
+            }
         }
 
-        function toggleModal(id, show) {
-            document.getElementById(id).classList.toggle('hidden', !show);
-        }
+        // GESTION UI UTILISATEUR
+        function updateUIForUser() {
+            const authBtns = document.getElementById('navAuthButtons');
+            const userDisplay = document.getElementById('navUserDisplay');
+            const banner = document.getElementById('welcomeBanner');
 
-        function renderCatalogue() {
-            const grid = document.getElementById('courses-grid');
-            grid.innerHTML = '';
-            
-            const coursAffiche = isUserAuthenticated 
-                ? BD_COURS.filter(c => c.classe === currentUserClass)
-                : BD_COURS;
-
-            coursAffiche.forEach(cours => {
-                const card = document.createElement('div');
-                card.className = "glass rounded-3xl p-6 flex flex-col h-full animate-in relative overflow-hidden border border-white/5";
+            if (currentUser) {
+                authBtns.classList.add('hidden');
+                userDisplay.classList.remove('hidden');
+                banner.classList.remove('hidden');
                 
-                if (!isUserAuthenticated) {
-                    card.innerHTML += `<div class="lock-indicator" onclick="showAuth()"><i class="fas fa-lock text-sm"></i></div>`;
+                document.getElementById('userNameNav').innerText = currentUser.nom;
+                document.getElementById('userInitialNav').innerText = currentUser.nom.charAt(0).toUpperCase();
+                document.getElementById('welcomeUserText').innerText = `${currentUser.nom} • ${currentUser.classe}`;
+                document.getElementById('userInitial').innerText = currentUser.nom.charAt(0).toUpperCase();
+                document.getElementById('motivationQuote').innerText = quotes[Math.floor(Math.random() * quotes.length)];
+            } else {
+                authBtns.classList.remove('hidden');
+                userDisplay.classList.add('hidden');
+                banner.classList.add('hidden');
+            }
+        }
+
+        // AUTHENTIFICATION
+        function generateEleveID() {
+            const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; 
+            let code = '';
+            for (let i = 0; i < 4; i++) code += chars.charAt(Math.floor(Math.random() * chars.length));
+            return code;
+        }
+
+        async function handleAuth(event) {
+            event.preventDefault();
+            const btn = document.getElementById('authSubmitBtn');
+            const originalBtnHtml = btn.innerHTML;
+            
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-circle-notch animate-spin"></i>';
+
+            try {
+                if (currentAuthMode === 'signup') {
+                    const nom = document.getElementById('regFullName').value.trim();
+                    const classe = document.getElementById('regClasse').value;
+                    const eleveID = generateEleveID();
+
+                    if (!nom || !classe) throw new Error("Veuillez remplir tous les champs.");
+
+                    const { error } = await sbClient.from('eleves').insert([{ id: eleveID, nom, classe, actif: false }]);
+                    if (error) throw error;
+
+                    const msg = `Bonjour SVT Excellence ! 👋\n\nInscription gratuite réussie :\n🆔 ID : ${eleveID}\n👤 Nom : ${nom}\n📚 Classe : ${classe}\n\nJe souhaite activer mon accès Premium pour 1000F.`;
+                    
+                    alert(`Compte gratuit créé ! \nNote bien ton ID : ${eleveID}\n\nOn passe sur WhatsApp pour l'activation.`);
+                    window.open(`https://wa.me/${ADMIN_PHONE}?text=${encodeURIComponent(msg)}`, '_blank');
+                    closeAuthModal();
+                } else {
+                    const enteredID = document.getElementById('loginID').value.toUpperCase().trim();
+                    if (!enteredID) throw new Error("L'ID est obligatoire.");
+
+                    const { data: user, error } = await sbClient.from('eleves').select('*').eq('id', enteredID).single();
+
+                    if (error || !user) throw new Error("Cet ID n'existe pas. Vérifie ton code ou inscris-toi gratuitement.");
+
+                    // Vérification Validité
+                    const now = new Date();
+                    const expiration = user.date_expiration ? new Date(user.date_expiration) : null;
+                    const isExpired = expiration ? now > expiration : true;
+
+                    if (!user.actif || isExpired) {
+                        closeAuthModal();
+                        showPremiumModal(
+                            `Ravi de te revoir, ${user.nom} !`,
+                            `Ton ID est bien reconnu, mais ton accès Premium est ${!user.actif ? 'inactif' : 'expiré'}. Débloque toutes tes leçons pour seulement 1000F.`
+                        );
+                        return;
+                    }
+
+                    currentUser = user;
+                    localStorage.setItem('svt_user_session', JSON.stringify(user));
+                    alert(`Accès autorisé. Prépare-toi à l'excellence, ${user.nom} !`);
+                    updateUIForUser();
+                    closeAuthModal();
+                    render();
                 }
+            } catch (err) {
+                alert(err.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = originalBtnHtml;
+            }
+        }
 
-                card.innerHTML += `
-                    <div class="mb-4 flex justify-between items-center">
-                        <div class="w-10 h-10 bg-slate-800 rounded-xl flex items-center justify-center text-emerald-500">
-                            <i class="fas ${cours.icone}"></i>
+        function logout() {
+            if(confirm("Veux-tu vraiment te déconnecter ?")) {
+                localStorage.removeItem('svt_user_session');
+                currentUser = null;
+                updateUIForUser();
+                render();
+            }
+        }
+
+        // AFFICHAGE DES COURS
+        function render() {
+            const grid = document.getElementById('coursesGrid');
+            if (!grid) return;
+
+            let filtered = allCourses.filter(c => {
+                const matchesSearch = c.titre.toLowerCase().includes(searchQuery.toLowerCase());
+                const matchesCategory = currentFilter === 'all' || c.classe === currentFilter || (currentFilter === 'free' && c.type_acces === 'free');
+                return matchesSearch && matchesCategory;
+            });
+
+            grid.innerHTML = '';
+            hideAllStatus();
+
+            if (filtered.length === 0) {
+                showStatus('noResults');
+                return;
+            }
+
+            filtered.forEach(course => {
+                const isPremium = course.type_acces === 'premium';
+                const card = document.createElement('div');
+                card.className = `course-card bg-white rounded-[3rem] p-8 border border-slate-100 flex flex-col h-full relative group hover:border-brand-100`;
+                
+                card.innerHTML = `
+                    <div class="flex justify-between items-start mb-8">
+                        <div class="w-16 h-16 bg-brand-50 text-brand-600 rounded-2xl flex items-center justify-center text-2xl group-hover:bg-brand-600 group-hover:text-white group-hover:rotate-6 transition-all duration-500">
+                            <i class="fas ${course.icone || 'fa-dna'}"></i>
                         </div>
-                        <span class="text-[10px] font-bold px-2 py-1 bg-white/5 text-slate-400 rounded-md border border-white/10 uppercase tracking-widest">${cours.classe}</span>
+                        <span class="px-4 py-2 rounded-2xl text-[10px] font-black uppercase tracking-widest ${isPremium ? 'bg-amber-50 text-amber-600 border border-amber-100' : 'bg-emerald-50 text-emerald-600 border border-emerald-100'}">
+                            ${isPremium ? '<i class="fas fa-crown mr-1"></i> Premium' : '<i class="fas fa-check mr-1"></i> Gratuit'}
+                        </span>
                     </div>
-                    
-                    <h3 class="text-xl font-bold text-white mb-4 leading-snug">${cours.titre}</h3>
-                    
-                    <div class="mb-6">
-                        <p class="text-emerald-500/80 text-[10px] font-black uppercase tracking-tighter mb-3">Objectifs Spécifiques :</p>
-                        <ul class="space-y-2">
-                            ${cours.objectifs.map((obj, i) => `
-                                <li class="text-slate-400 text-sm flex gap-3">
-                                    <span class="text-emerald-500 font-bold font-mono">${i+1}.</span>
-                                    <span>${obj}</span>
-                                </li>
+                    <div class="flex-grow">
+                        <p class="text-brand-600 text-[10px] font-black uppercase tracking-[0.2em] mb-3">${course.classe}</p>
+                        <h3 class="text-2xl font-black text-slate-900 leading-tight mb-6 group-hover:text-brand-600 transition-colors">${course.titre}</h3>
+                        <div class="space-y-4 mb-8">
+                            ${(course.cours_objectifs || []).slice(0, 3).map(o => `
+                                <div class="flex items-start gap-3 text-sm font-medium text-slate-500">
+                                    <div class="w-1.5 h-1.5 rounded-full bg-brand-400 mt-1.5 shrink-0"></div>
+                                    <span class="leading-tight">${o.description}</span>
+                                </div>
                             `).join('')}
-                        </ul>
+                        </div>
                     </div>
-
-                    <div class="mt-auto grid grid-cols-1 gap-3">
-                        <button onclick="${isUserAuthenticated ? `window.open(atob('${cours.urlVid}'), '_blank')` : 'showAuth()'}" 
-                            class="w-full py-3 bg-red-600/10 hover:bg-red-600 text-red-500 hover:text-white rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 ${!isUserAuthenticated ? 'locked-action' : ''}">
-                            <i class="fab fa-youtube"></i> VISIONNER LA VIDÉO
+                    <div class="grid grid-cols-2 gap-4 pt-8 border-t border-slate-50">
+                        <button onclick="handleAccess('${course.url_vid}', ${isPremium})" class="flex items-center justify-center gap-2 py-4 rounded-2xl bg-slate-900 text-white font-black text-xs hover:bg-brand-600 transition-all active:scale-95 shadow-lg shadow-slate-200">
+                            <i class="fas fa-play"></i> Vidéo
                         </button>
-                        <button onclick="${isUserAuthenticated ? `window.open(atob('${cours.urlPdf}'), '_blank')` : 'showAuth()'}" 
-                            class="w-full py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 ${!isUserAuthenticated ? 'locked-action' : ''}">
-                            <i class="far fa-file-pdf"></i> TÉLÉCHARGER LE SUPPORT
+                        <button onclick="handleAccess('${course.url_pdf}', ${isPremium})" class="flex items-center justify-center gap-2 py-4 rounded-2xl bg-slate-50 text-slate-700 font-black text-xs hover:bg-slate-200 transition-all active:scale-95 border border-slate-100">
+                            <i class="fas fa-file-pdf"></i> PDF
                         </button>
                     </div>
                 `;
@@ -396,98 +431,104 @@
             });
         }
 
-        // --- LOGIQUE AUTHENTIFICATION ---
-        async function hashValue(str) {
-            const buffer = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
-            return Array.from(new Uint8Array(buffer)).map(b => b.toString(16).padStart(2, '0')).join('');
-        }
-
-        async function handleLogin() {
-            const inputField = document.getElementById('access-input');
-            const input = inputField.value.trim().toUpperCase();
-            const unpaidBox = document.getElementById('unpaid-msg-box');
-            const unknownBtn = document.getElementById('unknown-code-btn');
-            const nameTarget = document.getElementById('unpaid-user-name');
-            
-            if (!input) return;
-
-            const hashed = await hashValue(input);
-            const eleve = BD_ELEVES[hashed];
-
-            // Reset UI alerts
-            unpaidBox.classList.add('hidden');
-            unknownBtn.classList.add('hidden');
-
-            if (eleve) {
-                if (eleve.actif === 1) {
-                    successLogin(eleve);
-                } else {
-                    // FONCTIONNALITÉ DEMANDÉE : Affichage du message de paiement
-                    triggerError(inputField);
-                    nameTarget.innerText = atob(eleve.nom);
-                    unpaidBox.classList.remove('hidden');
-                }
+        function handleAccess(url, isPremium) {
+            if (isPremium && !currentUser) {
+                showPremiumModal(
+                    "Contenu d'Excellence", 
+                    "Cette leçon est la clé pour booster tes notes. Accède à tout le programme Premium pour seulement 1000F par mois."
+                );
             } else {
-                triggerError(inputField);
-                unknownBtn.classList.remove('hidden');
+                window.open(url, '_blank');
             }
         }
 
-        function triggerError(field) {
-            field.classList.add('error-shake');
-            setTimeout(() => field.classList.remove('error-shake'), 400);
+        // MODALS
+        function showAuthModal(mode) {
+            currentAuthMode = mode;
+            const modal = document.getElementById('authModal');
+            const signupFields = document.getElementById('signupFields');
+            const loginFields = document.getElementById('loginFields');
+            const title = document.getElementById('authTitle');
+            const btnLabel = document.getElementById('authBtnLabel');
+            const footerBtn = document.getElementById('authFooterBtn');
+            const footerText = document.getElementById('authFooterText');
+
+            if (mode === 'signup') {
+                signupFields.classList.remove('hidden');
+                loginFields.classList.add('hidden');
+                title.innerText = "Création Gratuite";
+                btnLabel.innerText = "S'inscrire (Gratuit)";
+                footerText.innerText = "Déjà élève ?";
+                footerBtn.innerText = "Se connecter";
+                document.getElementById('authIcon').className = "fas fa-user-plus";
+            } else {
+                signupFields.classList.add('hidden');
+                loginFields.classList.remove('hidden');
+                title.innerText = "Bon retour !";
+                btnLabel.innerText = "C'est parti !";
+                footerText.innerText = "Nouveau ici ?";
+                footerBtn.innerText = "S'inscrire gratuitement";
+                document.getElementById('authIcon').className = "fas fa-user-graduate";
+            }
+            modal.classList.remove('hidden');
         }
 
-        function successLogin(eleve) {
-            isUserAuthenticated = true;
-            currentUserClass = eleve.classe;
-            const nomClair = atob(eleve.nom);
-            
-            toggleModal('auth-modal', false);
-            
-            // Mise à jour de l'UI
-            document.getElementById('nav-guest').classList.add('hidden');
-            document.getElementById('nav-info').classList.remove('hidden');
-            document.getElementById('user-tag').innerText = eleve.classe;
-            document.getElementById('header-welcome').innerHTML = `
-                <h2 class="text-4xl font-black text-white mb-2">Bienvenue, ${nomClair}</h2>
-                <p class="text-emerald-500 font-bold uppercase tracking-widest text-sm">Contenus pour la classe de ${eleve.classe}</p>
-            `;
-
-            renderCatalogue();
-            window.scrollTo({top: 0, behavior: 'smooth'});
+        function toggleAuthMode() { showAuthModal(currentAuthMode === 'login' ? 'signup' : 'login'); }
+        
+        function closeAuthModal() { 
+            document.getElementById('authModal').classList.add('hidden'); 
+            document.getElementById('authForm').reset();
         }
 
-        function sendReactivationRequest() {
-            const code = document.getElementById('access-input').value.trim().toUpperCase();
-            const msg = `Bonjour Sénégal Académie, mon abonnement (${code}) est en attente de paiement. Je souhaite payer 500 FCFA via Wave pour l'activer.`;
-            window.open(`https://wa.me/${atob(CONTACT_WA).replace('+', '')}?text=${encodeURIComponent(msg)}`, '_blank');
+        function showPremiumModal(title, msg) { 
+            const modal = document.getElementById('premiumModal');
+            document.getElementById('premiumModalTitle').innerText = title || "Accès Premium";
+            document.getElementById('premiumModalMsg').innerText = msg || "Débloquez tout pour 1000F.";
+            modal.classList.remove('hidden');
         }
 
-        function submitRequest() {
-            const p = document.getElementById('reg-prenom').value;
-            const n = document.getElementById('reg-nom').value;
-            const c = document.getElementById('reg-classe').value;
-            if(!p || !n || !c) return alert("Veuillez remplir tous les champs.");
-            const msg = `Bonjour Sénégal Académie, je suis ${p} ${n} en ${c}. Je souhaite commander un code d'accès.`;
-            window.open(`https://wa.me/${atob(CONTACT_WA).replace('+', '')}?text=${encodeURIComponent(msg)}`, '_blank');
-            toggleModal('request-modal', false);
+        function closePremiumModal() { 
+            document.getElementById('premiumModal').classList.add('hidden'); 
         }
 
-        // Sécurité
-        document.addEventListener('keydown', e => { if ((e.ctrlKey && ['s','u','i'].includes(e.key)) || e.key === 'F12') e.preventDefault(); });
+        function contactAdmin() {
+            const userPart = currentUser ? `Mon ID est ${currentUser.id}.` : "Je souhaite m'inscrire.";
+            const msg = `Bonjour SVT Excellence ! 👋\n\nJe souhaite activer mon abonnement Premium à 1000F / mois. ${userPart}`;
+            window.open(`https://wa.me/${ADMIN_PHONE}?text=${encodeURIComponent(msg)}`, '_blank');
+        }
+
+        // FILTRES ET RECHERCHE
+        document.getElementById('searchInput')?.addEventListener('input', (e) => { 
+            searchQuery = e.target.value; 
+            render(); 
+        });
+        
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.filter-btn').forEach(b => {
+                    b.className = 'filter-btn py-3 rounded-2xl font-bold transition-all bg-white text-slate-600 border border-slate-200 hover:border-brand-300 text-xs shadow-sm';
+                    if(b.dataset.filter === 'free') b.classList.add('text-emerald-600', 'border-emerald-100');
+                });
+                
+                btn.className = 'filter-btn py-3 rounded-2xl font-bold transition-all bg-brand-600 text-white text-xs shadow-lg shadow-brand-100';
+                currentFilter = btn.dataset.filter;
+                render();
+            });
+        });
+
+        function showStatus(id) {
+            hideAllStatus();
+            document.getElementById('statusContainer').classList.remove('hidden');
+            document.getElementById(id).classList.remove('hidden');
+            document.getElementById('coursesGrid').classList.add('hidden');
+        }
+
+        function hideAllStatus() {
+            document.getElementById('statusContainer').classList.add('hidden');
+            document.getElementById('coursesGrid').classList.remove('hidden');
+        }
+
+        window.onload = init;
     </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
