@@ -221,6 +221,16 @@
 
     <!-- MAIN CONTENT -->
     <main class="flex-grow max-w-7xl mx-auto px-6 py-16 w-full">
+        <div class="flex justify-center mb-10">
+    <div class="bg-white p-1.5 rounded-2xl border border-slate-200 shadow-sm inline-flex relative">
+        <button onclick="switchView('cours')" id="tabCours" class="relative z-10 px-6 py-2.5 rounded-xl text-sm font-black transition-all duration-300 bg-slate-900 text-white shadow-md">
+            <i class="fas fa-play-circle mr-2"></i>Cours Vidéo
+        </button>
+        <button onclick="switchView('annales')" id="tabAnnales" class="relative z-10 px-6 py-2.5 rounded-xl text-sm font-bold text-slate-500 transition-all duration-300 hover:text-amber-600 hover:bg-amber-50">
+            <i class="fas fa-book-bookmark mr-2"></i>Annales & Corrigés
+        </button>
+    </div>
+        </div>
         <!-- Status & Loader -->
         <div id="statusContainer" class="hidden text-center py-20">
             <div id="loader" class="hidden flex flex-col items-center">
