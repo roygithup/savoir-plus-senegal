@@ -456,7 +456,10 @@
         const ADMIN_PHONE = "221768776668";
 
         // State
+       // State
         let allCourses = [];
+        let allAnnales = [];          // <--- AJOUTÉ
+        let currentView = 'cours';    // <--- AJOUTÉ ('cours' ou 'annales')
         let currentFilter = 'all';
         let searchQuery = '';
         let currentAuthMode = 'login';
@@ -497,113 +500,159 @@
             });
         });
 
-        async function init() {
+async function init() {
             updateUIForUser();
             showStatus('loader');
+            
             try {
-                const { data, error } = await sbClient
-    .from('cours')
-    .select('*, cours_objectifs(*)')
-    .order('id', { ascending: true }); // Classe par ID (1, 2, 3...)
-                if (error) throw error;
-                allCourses = data || [];
-                if (allCourses.length === 0) showStatus('noResults');
-                else render();
+                // 1. Charger les cours (existant)
+                const { data: coursData, error: coursError } = await sbClient
+                    .from('cours')
+                    .select('*, cours_objectifs(*)')
+                    .order('id', { ascending: true });
+                    
+                if (coursError) throw coursError;
+                allCourses = coursData || [];
+
+                // 2. Charger les annales (NOUVEAU)
+                const { data: annalesData, error: annalesError } = await sbClient
+                    .from('annales')
+                    .select('*')
+                    .order('date_ajout', { ascending: false });
+
+                if (annalesError) console.error("Erreur Annales:", annalesError);
+                allAnnales = annalesData || [];
+
+                // Rendu initial
+                render();
+
             } catch (err) {
                 console.error("Erreur Supabase:", err);
-                showToast("Impossible de charger les cours. Vérifiez votre connexion.", "error");
+                showToast("Impossible de charger le contenu.", "error");
                 showStatus('noResults');
             }
         }
 
         // --- CORE UI FUNCTIONS ---
-        function render() {
-            const grid = document.getElementById('coursesGrid');
-            if (!grid) return;
+function render() {
+    const grid = document.getElementById('coursesGrid');
+    if (!grid) return;
+    
+    hideAllStatus();
+    grid.innerHTML = '';
 
-            let filtered = allCourses.filter(c => {
-                const matchesSearch = c.titre.toLowerCase().includes(searchQuery.toLowerCase());
-                let matchesCategory = true;
-
-                // --- NOUVELLE LOGIQUE DE FILTRAGE ---
-                if (currentUser) {
-                    // 1. Si l'élève est connecté :
-                    // On vérifie d'abord si le cours correspond STRICTEMENT à sa classe
-                    if (c.classe !== currentUser.classe) {
-                        matchesCategory = false;
-                    } else {
-                        // Si c'est sa classe, on autorise le filtre "Gratuit" si activé
-                        if (currentFilter === 'free') matchesCategory = c.type_acces === 'free';
-                        // Sinon (si filter est 'all', 'Terminale' ou '3ème'), on laisse passer car la classe est déjà bonne
-                    }
-                } else {
-                    // 2. Si visiteur (pas connecté) : Comportement classique avec les boutons
-                    if (currentFilter === 'free') matchesCategory = c.type_acces === 'free';
-                    else if (currentFilter !== 'all') matchesCategory = c.classe === currentFilter;
-                }
-                // -------------------------------------
-
-                return matchesSearch && matchesCategory;
-            });
-
-            if (filtered.length === 0) {
-                showStatus('noResults');
-                return;
-            }
-
-            hideAllStatus();
-            grid.innerHTML = '';
-
-            filtered.forEach((course, index) => {
-                const isPremium = course.type_acces === 'premium';
-                const card = document.createElement('div');
-                card.className = `course-card bg-white rounded-[2rem] p-6 border border-slate-100 flex flex-col h-full relative group animate-slide-up`;
-                card.style.animationDelay = `${index * 50}ms`;
-
-                const objectifsHtml = (course.cours_objectifs || []).slice(0, 3).map(o => `
-                    <div class="flex items-start gap-2.5 text-xs font-medium text-slate-500">
-                        <i class="fas fa-check text-brand-400 mt-0.5 text-[10px]"></i>
-                        <span class="leading-relaxed">${o.description}</span>
-                    </div>
-                `).join('');
-
-                card.innerHTML = `
-                    <div class="flex justify-between items-start mb-6">
-                        <div class="w-14 h-14 bg-brand-50 text-brand-600 rounded-2xl flex items-center justify-center text-xl shadow-sm group-hover:bg-brand-600 group-hover:text-white transition-colors duration-300">
-                            <i class="fas ${course.icone || 'fa-dna'}"></i>
-                        </div>
-                        <span class="px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-wide border ${
-                            isPremium 
-                            ? 'bg-amber-50 text-amber-600 border-amber-100' 
-                            : 'bg-emerald-50 text-emerald-600 border-emerald-100'
-                        }">
-                            ${isPremium ? '<i class="fas fa-crown mr-1"></i> Premium' : 'Gratuit'}
-                        </span>
-                    </div>
-                    <div class="flex-grow">
-                        <div class="flex items-center gap-2 mb-2">
-                            <span class="text-[9px] font-black uppercase tracking-wider text-slate-400 bg-slate-50 px-2 py-1 rounded-md border border-slate-100">${course.classe}</span>
-                        </div>
-                        <h3 class="text-xl font-extrabold text-slate-900 leading-tight mb-4 group-hover:text-brand-600 transition-colors line-clamp-2">${course.titre}</h3>
-                        <div class="space-y-3 mb-6">
-                            ${objectifsHtml || '<p class="text-xs text-slate-400 italic">Aucun objectif listé</p>'}
-                        </div>
-                    </div>
-                    <div class="grid grid-cols-3 gap-2 pt-6 border-t border-slate-50 mt-auto">
-                         <button onclick="handleAccess('${course.url_vid}', ${isPremium})" class="flex flex-col items-center justify-center gap-1 py-3 rounded-xl bg-slate-900 text-white font-bold text-[10px] hover:bg-slate-800 transition-all active:scale-95 shadow-lg shadow-slate-200">
-                            <i class="fas fa-play text-sm"></i> Vidéo
-                        </button>
-                        <button onclick="handleQuizAccess('${course.id}', '${course.titre}', ${isPremium})" class="flex flex-col items-center justify-center gap-1 py-3 rounded-xl bg-quiz-600 text-white font-bold text-[10px] hover:bg-quiz-700 transition-all active:scale-95 shadow-lg shadow-quiz-200">
-                            <i class="fas fa-brain text-sm"></i> Quiz
-                        </button>
-                        <button onclick="handleAccess('${course.url_pdf}', ${isPremium})" class="flex flex-col items-center justify-center gap-1 py-3 rounded-xl bg-slate-50 text-slate-600 font-bold text-[10px] hover:bg-slate-100 border border-slate-200 transition-all active:scale-95">
-                            <i class="fas fa-file-pdf text-sm"></i> PDF
-                        </button>
-                    </div>
-                `;
-                grid.appendChild(card);
-            });
+    // --- CAS 1 : VUE ANNALES (NOUVEAU) ---
+    if (currentView === 'annales') {
+        if (allAnnales.length === 0) {
+            showStatus('noResults'); 
+            return;
         }
+
+        allAnnales.forEach((annale, index) => {
+            const card = document.createElement('div');
+            // Design distinctif : Bordure Ambre, Fond léger
+            card.className = `bg-white rounded-[2rem] p-6 border-2 border-amber-100 flex flex-col h-full relative group hover:border-amber-300 transition-all duration-300 shadow-xl shadow-amber-900/5 animate-slide-up`;
+            card.style.animationDelay = `${index * 50}ms`;
+
+            card.innerHTML = `
+                <div class="absolute -top-3 -right-3 bg-red-500 text-white text-[10px] font-black px-3 py-1 rounded-full shadow-md animate-pulse">
+                    OFFRE SPÉCIALE
+                </div>
+
+                <div class="flex items-start gap-4 mb-4">
+                    <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-amber-400 to-orange-500 text-white flex items-center justify-center text-2xl shadow-lg shadow-orange-200 shrink-0">
+                        <i class="fas fa-file-invoice-dollar"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-extrabold text-slate-900 leading-tight mb-1">${annale.titre}</h3>
+                        <div class="text-2xl font-black text-amber-600">${annale.prix} F <span class="text-xs text-slate-400 font-medium line-through"> ${(annale.prix * 1.5).toFixed(0)} F</span></div>
+                    </div>
+                </div>
+
+                <div class="bg-amber-50 rounded-xl p-4 mb-6 border border-amber-100">
+                    <p class="text-xs font-bold text-amber-800 uppercase tracking-wide mb-2"><i class="fas fa-fire mr-1"></i> Pourquoi l'acheter ?</p>
+                    <p class="text-sm text-slate-700 leading-relaxed font-medium">
+                        Ne laisse pas le hasard décider de ta note ! Ce document contient les <span class="font-bold text-slate-900">corrigés types validés</span> par les correcteurs officiels. C'est l'outil ultime pour viser la mention.
+                    </p>
+                </div>
+
+                <div class="mt-auto grid grid-cols-2 gap-3">
+                    <button onclick="window.open('${annale.url_pdf}', '_blank')" class="px-4 py-3 bg-white text-slate-700 border-2 border-slate-200 rounded-xl font-bold text-xs hover:bg-slate-50 transition">
+                        <i class="fas fa-eye mr-1"></i> Voir extrait
+                    </button>
+                    <button onclick="orderAnnale('${annale.titre}', '${annale.prix}')" class="px-4 py-3 bg-slate-900 text-white rounded-xl font-bold text-xs hover:bg-amber-600 shadow-lg shadow-slate-200 hover:shadow-amber-200 transition flex items-center justify-center gap-2 group-hover:scale-105 duration-200">
+                        <span>Commander</span>
+                        <i class="fab fa-whatsapp text-lg"></i>
+                    </button>
+                </div>
+            `;
+            grid.appendChild(card);
+        });
+        return; // Fin du rendu pour les annales
+    }
+
+    // --- CAS 2 : VUE COURS (CODE EXISTANT) ---
+    // (Garde ici ton code de filtrage des cours existant...)
+    let filtered = allCourses.filter(c => {
+        const matchesSearch = c.titre.toLowerCase().includes(searchQuery.toLowerCase());
+        let matchesCategory = true;
+        if (currentUser) {
+            if (c.classe !== currentUser.classe) matchesCategory = false;
+            else if (currentFilter === 'free') matchesCategory = c.type_acces === 'free';
+        } else {
+            if (currentFilter === 'free') matchesCategory = c.type_acces === 'free';
+            else if (currentFilter !== 'all') matchesCategory = c.classe === currentFilter;
+        }
+        return matchesSearch && matchesCategory;
+    });
+
+    if (filtered.length === 0) {
+        showStatus('noResults');
+        return;
+    }
+
+    // (Garde ici ta boucle de création de cartes de cours existante...)
+    filtered.forEach((course, index) => {
+        // ... Ton code existant pour créer les cartes "blue" ...
+        // Je réinsère ton code simplifié pour que tu aies le bloc complet si besoin
+        const isPremium = course.type_acces === 'premium';
+        const card = document.createElement('div');
+        card.className = `course-card bg-white rounded-[2rem] p-6 border border-slate-100 flex flex-col h-full relative group animate-slide-up`;
+        card.style.animationDelay = `${index * 50}ms`;
+        
+        // (Contenu HTML de la carte cours identique à ton fichier d'origine)
+        const objectifsHtml = (course.cours_objectifs || []).slice(0, 3).map(o => `
+            <div class="flex items-start gap-2.5 text-xs font-medium text-slate-500">
+                <i class="fas fa-check text-brand-400 mt-0.5 text-[10px]"></i>
+                <span class="leading-relaxed">${o.description}</span>
+            </div>
+        `).join('');
+
+        card.innerHTML = `
+            <div class="flex justify-between items-start mb-6">
+                <div class="w-14 h-14 bg-brand-50 text-brand-600 rounded-2xl flex items-center justify-center text-xl shadow-sm group-hover:bg-brand-600 group-hover:text-white transition-colors duration-300">
+                    <i class="fas ${course.icone || 'fa-dna'}"></i>
+                </div>
+                <span class="px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-wide border ${isPremium ? 'bg-amber-50 text-amber-600 border-amber-100' : 'bg-emerald-50 text-emerald-600 border-emerald-100'}">
+                    ${isPremium ? '<i class="fas fa-crown mr-1"></i> Premium' : 'Gratuit'}
+                </span>
+            </div>
+            <div class="flex-grow">
+                <div class="flex items-center gap-2 mb-2">
+                    <span class="text-[9px] font-black uppercase tracking-wider text-slate-400 bg-slate-50 px-2 py-1 rounded-md border border-slate-100">${course.classe}</span>
+                </div>
+                <h3 class="text-xl font-extrabold text-slate-900 leading-tight mb-4 group-hover:text-brand-600 transition-colors line-clamp-2">${course.titre}</h3>
+                <div class="space-y-3 mb-6">${objectifsHtml || '<p class="text-xs text-slate-400 italic">Aucun objectif listé</p>'}</div>
+            </div>
+            <div class="grid grid-cols-3 gap-2 pt-6 border-t border-slate-50 mt-auto">
+                 <button onclick="handleAccess('${course.url_vid}', ${isPremium})" class="flex flex-col items-center justify-center gap-1 py-3 rounded-xl bg-slate-900 text-white font-bold text-[10px] hover:bg-slate-800 transition-all active:scale-95 shadow-lg shadow-slate-200"><i class="fas fa-play text-sm"></i> Vidéo</button>
+                <button onclick="handleQuizAccess('${course.id}', '${course.titre}', ${isPremium})" class="flex flex-col items-center justify-center gap-1 py-3 rounded-xl bg-quiz-600 text-white font-bold text-[10px] hover:bg-quiz-700 transition-all active:scale-95 shadow-lg shadow-quiz-200"><i class="fas fa-brain text-sm"></i> Quiz</button>
+                <button onclick="handleAccess('${course.url_pdf}', ${isPremium})" class="flex flex-col items-center justify-center gap-1 py-3 rounded-xl bg-slate-50 text-slate-600 font-bold text-[10px] hover:bg-slate-100 border border-slate-200 transition-all active:scale-95"><i class="fas fa-file-pdf text-sm"></i> PDF</button>
+            </div>
+        `;
+        grid.appendChild(card);
+    });
+}
 
         // --- ACCESS CONTROL & QUIZ LOGIC ---
 
@@ -1006,6 +1055,42 @@ function orderManual() {
             d.innerHTML = `<i class="fas ${ic} text-lg"></i><p class="text-sm font-bold text-slate-700">${m}</p>`;
             c.appendChild(d); requestAnimationFrame(() => d.classList.remove('translate-x-full')); setTimeout(() => { d.classList.add('translate-x-full', 'opacity-0'); setTimeout(() => d.remove(), 500); }, 3500);
         }
+
+        function switchView(view) {
+    currentView = view;
+    
+    // Mise à jour visuelle des boutons
+    const btnCours = document.getElementById('tabCours');
+    const btnAnnales = document.getElementById('tabAnnales');
+    
+    if (view === 'cours') {
+        btnCours.className = "relative z-10 px-6 py-2.5 rounded-xl text-sm font-black transition-all duration-300 bg-slate-900 text-white shadow-md";
+        btnAnnales.className = "relative z-10 px-6 py-2.5 rounded-xl text-sm font-bold text-slate-500 transition-all duration-300 hover:text-amber-600 hover:bg-amber-50";
+        // Réafficher les filtres classiques si nécessaire
+        document.getElementById('filterContainer').parentNode.classList.remove('hidden');
+    } else {
+        btnCours.className = "relative z-10 px-6 py-2.5 rounded-xl text-sm font-bold text-slate-500 transition-all duration-300 hover:text-brand-600 hover:bg-slate-50";
+        btnAnnales.className = "relative z-10 px-6 py-2.5 rounded-xl text-sm font-black transition-all duration-300 bg-amber-500 text-white shadow-lg shadow-amber-200";
+        // Masquer les filtres de cours car ils ne s'appliquent pas aux annales
+        document.getElementById('filterContainer').parentNode.classList.add('hidden');
+    }
+
+    render();
+}
+        function orderAnnale(titre, prix) {
+    // Message insistant et pré-rempli pour faciliter la vente
+    const nomClient = currentUser ? currentUser.nom : "un élève";
+    const classeClient = currentUser ? currentUser.classe : "non spécifiée";
+    
+    const message = `🔥 *COMMANDE URGENTE* 🔥\n\n` +
+                    `Bonjour, je suis *${nomClient}* (Classe: ${classeClient}).\n` +
+                    `Je veux acheter l'annale suivante pour booster mes notes :\n\n` +
+                    `📚 Titre : *${titre}*\n` +
+                    `💰 Prix : *${prix} FCFA*\n\n` +
+                    `J'ai l'argent, comment je paye ? (Orange Money / Wave ?)`;
+
+    window.open(`https://wa.me/${ADMIN_PHONE}?text=${encodeURIComponent(message)}`, '_blank');
+}
     </script>
 </body>
 </html>
