@@ -945,6 +945,7 @@ async function handleAuth(e) {
     btn.innerHTML = '<i class="fas fa-circle-notch animate-spin"></i> Traitement...';
 
     try {
+        // --- BLOC À SUPPRIMER (de la ligne 687 à 729 environ) ---
         if (currentAuthMode === 'signup') {
             const nom = document.getElementById('regFullName').value.trim();
             const classe = document.getElementById('regClasse').value;
@@ -992,6 +993,7 @@ async function handleAuth(e) {
             }, 1500);
 
         } else {
+// --- FIN DU BLOC À SUPPRIMER ---
             // ... (le reste du code pour la connexion reste inchangé)
             const id = document.getElementById('loginID').value.toUpperCase().trim();
             if (id.length < 4) throw new Error("ID invalide.");
