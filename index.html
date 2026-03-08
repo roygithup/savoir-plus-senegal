@@ -164,7 +164,10 @@
             <div class="lg:w-1/2 text-center lg:text-left">
                 <div class="inline-flex items-center gap-2 bg-brand-50 text-brand-700 px-4 py-1.5 rounded-full text-[11px] font-black mb-6 border border-brand-100 tracking-wider uppercase shadow-sm">
                     <span class="w-2 h-2 rounded-full bg-brand-500 animate-pulse"></span>
-                    Nouveau Programme 2024
+                    <!-- compteur -->
+                    <span id="monCompteur" class="hidden md:inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-700">
+                        Chargement...
+                    </span>
                 </div>
                 <h1 class="text-4xl md:text-6xl font-black text-slate-900 mb-6 leading-[1.1] tracking-tight">
                     L'Excellence en SVT à portée de main.
@@ -921,6 +924,21 @@ function updateUIForUser() {
         document.getElementById('userInitialNav').innerText = initials;
         document.getElementById('welcomeUserText').innerText = `${currentUser.nom}`;
         document.getElementById('userInitial').innerText = initials;
+        // Compteur
+        // --- Bloc Compteur Simple ---
+const el = document.getElementById('monCompteur');
+const jours = Math.ceil((new Date(currentUser.date_expiration) - new Date()) / 86400000);
+
+if (jours > 0) {
+    el.innerText = jours + " jours restants";
+    el.className = "hidden md:inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-700";
+} else {
+    el.innerText = "Votre abonnement a expiré. Veuillez contacter l’administrateur pour vous réabonner.";
+    el.className = "flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-red-100 text-red-700 animate-pulse";
+}
+el.classList.remove('hidden');
+// --- Fin Bloc ---
+
         document.getElementById('motivationQuote').innerText = quotes[Math.floor(Math.random() * quotes.length)];
 
         // --- GESTION DU COMPTEUR D'ABONNEMENT ---
@@ -1030,15 +1048,43 @@ async function handleAuth(e) {
                 closeAuthModal(); 
             }, 1500);
 
+// ... (début de handleAuth)
         } else {
-            // ... (le reste du code pour la connexion reste inchangé)
+            // --- MODE CONNEXION ---
             const id = document.getElementById('loginID').value.toUpperCase().trim();
             if (id.length < 4) throw new Error("ID invalide.");
+            
             const { data, error } = await sbClient.from('eleves').select('*').eq('id', id).single();
             if (error || !data) throw new Error("ID introuvable.");
-            currentUser = data; localStorage.setItem('svt_user_session', JSON.stringify(data));
-            showToast(`Bienvenue ${data.nom.split(' ')[0]}`, "success"); updateUIForUser(); closeAuthModal(); render();
+
+            const currentDeviceId = getDeviceID();
+
+            // VÉRIFICATION ANTI-PARTAGE
+            if (data.device_id) {
+                // L'ID a déjà été utilisé sur un appareil. Est-ce le même ?
+                if (data.device_id !== currentDeviceId) {
+                    throw new Error("Ce code est déjà utilisé sur un autre téléphone. Contactez l'admin si vous avez changé d'appareil.");
+                }
+            } else {
+                // C'est la première connexion ! On lie ce code à cet appareil.
+                const { error: updateError } = await sbClient
+                    .from('eleves')
+                    .update({ device_id: currentDeviceId })
+                    .eq('id', id);
+                    
+                if (updateError) throw new Error("Erreur lors de la liaison de l'appareil.");
+                data.device_id = currentDeviceId; // On met à jour la donnée locale
+            }
+
+            // Si tout est bon, on connecte l'utilisateur
+            currentUser = data; 
+            localStorage.setItem('svt_user_session', JSON.stringify(data));
+            showToast(`Bienvenue ${data.nom.split(' ')[0]}`, "success"); 
+            updateUIForUser(); 
+            closeAuthModal(); 
+            render();
         }
+// ... (fin de handleAuth)
     } catch (err) { 
         showToast(err.message, "error"); 
     } finally { 
@@ -1129,6 +1175,16 @@ function orderManual() {
                     `J'ai l'argent, comment je paye ? (Orange Money / Wave ?)`;
 
     window.open(`https://wa.me/${ADMIN_PHONE}?text=${encodeURIComponent(message)}`, '_blank');
+}
+// Code LOcal
+    function getDeviceID() {
+    let deviceId = localStorage.getItem('svt_device_id');
+    if (!deviceId) {
+        // Crée un identifiant unique aléatoire si c'est la première visite
+        deviceId = 'dev_' + Math.random().toString(36).substr(2, 9) + Date.now().toString(36);
+        localStorage.setItem('svt_device_id', deviceId);
+    }
+    return deviceId;
 }
     </script>
 </body>
