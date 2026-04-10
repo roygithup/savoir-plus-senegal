@@ -461,10 +461,9 @@
         const ADMIN_PHONE = "221768776668";
 
         // State
-       // State
         let allCourses = [];
-        let allAnnales = [];          // <--- AJOUTÉ
-        let currentView = 'cours';    // <--- AJOUTÉ ('cours' ou 'annales')
+        let allAnnales = [];         
+        let currentView = 'cours';   
         let currentFilter = 'all';
         let searchQuery = '';
         let currentAuthMode = 'login';
@@ -487,10 +486,17 @@
         // --- INITIALISATION ---
         window.addEventListener('DOMContentLoaded', () => {
             try {
-                const stored = localStorage.getItem('svt_user_session');
+                // MODIFICATION : Supprimer l'ancien localStorage s'il existe pour forcer 
+                // les anciens utilisateurs à se reconnecter et passer sur sessionStorage
+                if (localStorage.getItem('svt_user_session')) {
+                    localStorage.removeItem('svt_user_session');
+                }
+
+                // MODIFICATION : Utilisation de sessionStorage. Se détruit à la fermeture de la fenêtre/navigateur
+                const stored = sessionStorage.getItem('svt_user_session');
                 if (stored) currentUser = JSON.parse(stored);
             } catch (e) {
-                localStorage.removeItem('svt_user_session');
+                sessionStorage.removeItem('svt_user_session');
             }
 
             init();
@@ -510,7 +516,7 @@ async function init() {
             showStatus('loader');
             
             try {
-                // 1. Charger les cours (existant)
+                // 1. Charger les cours 
                 const { data: coursData, error: coursError } = await sbClient
                     .from('cours')
                     .select('*, cours_objectifs(*)')
@@ -519,7 +525,7 @@ async function init() {
                 if (coursError) throw coursError;
                 allCourses = coursData || [];
 
-                // 2. Charger les annales (NOUVEAU)
+                // 2. Charger les annales 
                 const { data: annalesData, error: annalesError } = await sbClient
                     .from('annales')
                     .select('*')
@@ -546,7 +552,7 @@ function render() {
     hideAllStatus();
     grid.innerHTML = '';
 
-    // --- CAS 1 : VUE ANNALES (NOUVEAU) ---
+    // --- CAS 1 : VUE ANNALES ---
     if (currentView === 'annales') {
         if (allAnnales.length === 0) {
             showStatus('noResults'); 
@@ -555,7 +561,6 @@ function render() {
 
         allAnnales.forEach((annale, index) => {
             const card = document.createElement('div');
-            // Design distinctif : Bordure Ambre, Fond léger
             card.className = `bg-white rounded-[2rem] p-6 border-2 border-amber-100 flex flex-col h-full relative group hover:border-amber-300 transition-all duration-300 shadow-xl shadow-amber-900/5 animate-slide-up`;
             card.style.animationDelay = `${index * 50}ms`;
 
@@ -593,11 +598,10 @@ function render() {
             `;
             grid.appendChild(card);
         });
-        return; // Fin du rendu pour les annales
+        return; 
     }
 
-    // --- CAS 2 : VUE COURS (CODE EXISTANT) ---
-    // (Garde ici ton code de filtrage des cours existant...)
+    // --- CAS 2 : VUE COURS ---
     let filtered = allCourses.filter(c => {
         const matchesSearch = c.titre.toLowerCase().includes(searchQuery.toLowerCase());
         let matchesCategory = true;
@@ -616,16 +620,12 @@ function render() {
         return;
     }
 
-    // (Garde ici ta boucle de création de cartes de cours existante...)
     filtered.forEach((course, index) => {
-        // ... Ton code existant pour créer les cartes "blue" ...
-        // Je réinsère ton code simplifié pour que tu aies le bloc complet si besoin
         const isPremium = course.type_acces === 'premium';
         const card = document.createElement('div');
         card.className = `course-card bg-white rounded-[2rem] p-6 border border-slate-100 flex flex-col h-full relative group animate-slide-up`;
         card.style.animationDelay = `${index * 50}ms`;
         
-        // (Contenu HTML de la carte cours identique à ton fichier d'origine)
         const objectifsHtml = (course.cours_objectifs || []).slice(0, 3).map(o => `
             <div class="flex items-start gap-2.5 text-xs font-medium text-slate-500">
                 <i class="fas fa-check text-brand-400 mt-0.5 text-[10px]"></i>
@@ -669,8 +669,25 @@ function render() {
 
         function checkPremiumLock(isPremium) {
             if (isPremium) {
-                if (!currentUser) { showAuthModal('login'); showToast("Connecte-toi pour voir ce contenu.", "warning"); return true; }
-                if (!currentUser.actif) { showPremiumModal("Contenu Verrouillé", "Passe en Premium pour 2000F."); return true; }
+                if (!currentUser) { 
+                    showAuthModal('login'); 
+                    showToast("Connecte-toi pour voir ce contenu.", "warning"); 
+                    return true; 
+                }
+                
+                // MODIFICATION : Vérifier non seulement si actif=true, mais aussi si la date n'est pas expirée
+                let isExpired = false;
+                if (currentUser.date_expiration) {
+                    const daysRemaining = Math.ceil((new Date(currentUser.date_expiration) - new Date()) / 86400000);
+                    if (daysRemaining <= 0) {
+                        isExpired = true;
+                    }
+                }
+
+                if (!currentUser.actif || isExpired) { 
+                    showPremiumModal("Abonnement Requis", "Ton abonnement est inactif ou a expiré. Passe en Premium ou renouvelle-le pour 2000F."); 
+                    return true; 
+                }
             }
             return false;
         }
@@ -910,7 +927,6 @@ function updateUIForUser() {
     const heroCTA = document.getElementById('heroCTA');
 
     if (currentUser) {
-        // L'utilisateur est connecté
         authBtns.classList.add('hidden');
         userDisplay.classList.remove('hidden');
         banner.classList.remove('hidden');
@@ -924,30 +940,28 @@ function updateUIForUser() {
         document.getElementById('userInitialNav').innerText = initials;
         document.getElementById('welcomeUserText').innerText = `${currentUser.nom}`;
         document.getElementById('userInitial').innerText = initials;
-        // Compteur
-        // --- Bloc Compteur Simple ---
-const el = document.getElementById('monCompteur');
-const jours = Math.ceil((new Date(currentUser.date_expiration) - new Date()) / 86400000);
+        
+        // Compteur de bienvenue
+        const el = document.getElementById('monCompteur');
+        const jours = Math.ceil((new Date(currentUser.date_expiration) - new Date()) / 86400000);
 
-if (jours > 0) {
-    el.innerText = jours + " jours restants";
-    el.className = "hidden md:inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-700";
-} else {
-    el.innerText = "Votre abonnement a expiré. Veuillez contacter l’administrateur pour vous réabonner.";
-    el.className = "flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-red-100 text-red-700 animate-pulse";
-}
-el.classList.remove('hidden');
-// --- Fin Bloc ---
+        if (jours > 0) {
+            el.innerText = jours + " jours restants";
+            el.className = "hidden md:inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-700";
+        } else {
+            el.innerText = "Votre abonnement a expiré. Veuillez contacter l’administrateur pour vous réabonner.";
+            el.className = "flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-red-100 text-red-700 animate-pulse";
+        }
+        el.classList.remove('hidden');
 
         document.getElementById('motivationQuote').innerText = quotes[Math.floor(Math.random() * quotes.length)];
 
-        // --- GESTION DU COMPTEUR D'ABONNEMENT ---
+        // --- GESTION DU COMPTEUR D'ABONNEMENT DANS LA BARRE DE NAVIGATION ---
         const subStatusBox = document.getElementById('subscriptionStatus');
         
         if (subStatusBox && currentUser.date_expiration) {
             subStatusBox.classList.remove('hidden');
             
-            // Calcul du temps restant
             const expirationDate = new Date(currentUser.date_expiration);
             const today = new Date();
             const timeDiff = expirationDate.getTime() - today.getTime();
@@ -967,21 +981,18 @@ el.classList.remove('hidden');
                 subStatusBox.className = "flex items-center gap-2 px-3 py-1.5 rounded-lg text-[10px] md:text-[11px] font-bold bg-red-50 text-red-700 border border-red-200 animate-pulse cursor-pointer transition-transform hover:scale-105";
                 subStatusBox.innerHTML = `
                     <i class="fas fa-exclamation-triangle text-red-500"></i>
-                    <span class="hidden lg:inline">Votre abonnement a expiré. Veuillez contacter l'administrateur pour vous réabonner.</span>
-                    <span class="lg:hidden text-[9px]">Abonnement expiré (Contactez l'admin)</span>
+                    <span class="hidden lg:inline">Votre abonnement a expiré. Cliquez ici pour le renouveler.</span>
+                    <span class="lg:hidden text-[9px]">Abonnement expiré</span>
                 `;
-                // Redirection vers l'admin au clic
                 subStatusBox.onclick = () => contactAdmin();
             }
         }
     } else {
-        // L'utilisateur est déconnecté
         authBtns.classList.remove('hidden');
         userDisplay.classList.add('hidden');
         banner.classList.add('hidden');
         if (heroCTA) heroCTA.classList.remove('hidden');
         
-        // On cache le compteur si déconnecté
         const subStatusBox = document.getElementById('subscriptionStatus');
         if (subStatusBox) subStatusBox.classList.add('hidden');
     }
@@ -1006,20 +1017,17 @@ async function handleAuth(e) {
             const nom = document.getElementById('regFullName').value.trim();
             const classe = document.getElementById('regClasse').value;
 
-            // 1. Vérification des champs vides
             if (!nom || !classe) throw new Error("Champs manquants.");
 
-            // 2. Forcer Prénom ET Nom (au moins deux mots)
             const nameParts = nom.split(' ').filter(p => p.length > 0);
             if (nameParts.length < 2) {
                 throw new Error("Veuillez entrer votre prénom ET votre nom complet.");
             }
 
-            // 3. Vérification des doublons dans Supabase
             const { data: existingUser, error: checkError } = await sbClient
                 .from('eleves')
                 .select('id')
-                .ilike('nom', nom) // 'ilike' pour ignorer la casse (Majuscules/Minuscules)
+                .ilike('nom', nom) 
                 .maybeSingle();
 
             if (checkError) throw checkError;
@@ -1027,7 +1035,6 @@ async function handleAuth(e) {
                 throw new Error("Ce nom est déjà inscrit. Si c'est vous, contactez l'admin ou ajoutez un 2ème prénom.");
             }
 
-            // 4. Création du compte si tout est OK
             const id = generateEleveID();
             const { error } = await sbClient.from('eleves').insert([{ id, nom, classe, actif: false }]);
             
@@ -1035,7 +1042,6 @@ async function handleAuth(e) {
 
             showToast(`Compte créé ! ID: ${id}`, "success");
             
-            // Message WhatsApp personnalisé (commercial)
             const whatsappMsg = `Salut SVT Excellence ! 👋\n\n` +
                                 `Je viens de créer mon compte.\n` +
                                 `👤 Nom complet : *${nom}* \n` +
@@ -1048,7 +1054,6 @@ async function handleAuth(e) {
                 closeAuthModal(); 
             }, 1500);
 
-// ... (début de handleAuth)
         } else {
             // --- MODE CONNEXION ---
             const id = document.getElementById('loginID').value.toUpperCase().trim();
@@ -1059,32 +1064,29 @@ async function handleAuth(e) {
 
             const currentDeviceId = getDeviceID();
 
-            // VÉRIFICATION ANTI-PARTAGE
             if (data.device_id) {
-                // L'ID a déjà été utilisé sur un appareil. Est-ce le même ?
                 if (data.device_id !== currentDeviceId) {
                     throw new Error("Ce code est déjà utilisé sur un autre téléphone. Contactez l'admin si vous avez changé d'appareil.");
                 }
             } else {
-                // C'est la première connexion ! On lie ce code à cet appareil.
                 const { error: updateError } = await sbClient
                     .from('eleves')
                     .update({ device_id: currentDeviceId })
                     .eq('id', id);
                     
                 if (updateError) throw new Error("Erreur lors de la liaison de l'appareil.");
-                data.device_id = currentDeviceId; // On met à jour la donnée locale
+                data.device_id = currentDeviceId; 
             }
 
-            // Si tout est bon, on connecte l'utilisateur
             currentUser = data; 
-            localStorage.setItem('svt_user_session', JSON.stringify(data));
+            // MODIFICATION : Utilisation de sessionStorage au lieu de localStorage
+            sessionStorage.setItem('svt_user_session', JSON.stringify(data));
+            
             showToast(`Bienvenue ${data.nom.split(' ')[0]}`, "success"); 
             updateUIForUser(); 
             closeAuthModal(); 
             render();
         }
-// ... (fin de handleAuth)
     } catch (err) { 
         showToast(err.message, "error"); 
     } finally { 
@@ -1093,31 +1095,35 @@ async function handleAuth(e) {
     }
 }
         function generateEleveID() { const c='ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; let r=''; for(let i=0;i<4;i++) r+=c.charAt(Math.floor(Math.random()*c.length)); return r; }
-        function logout() { localStorage.removeItem('svt_user_session'); currentUser = null; updateUIForUser(); showToast("Déconnecté", "info"); render(); }
+        
+        function logout() { 
+            // MODIFICATION : Nettoyage du sessionStorage
+            sessionStorage.removeItem('svt_user_session'); 
+            currentUser = null; 
+            updateUIForUser(); 
+            showToast("Déconnecté", "info"); 
+            render(); 
+        }
+
         function showPremiumModal(t, m) { document.getElementById('premiumModalTitle').innerText = t; document.getElementById('premiumModalMsg').innerText = m; document.getElementById('premiumModal').classList.remove('hidden'); }
         function closePremiumModal() { document.getElementById('premiumModal').classList.add('hidden'); }
         function contactAdmin() {
     let message = "";
 
     if (currentUser) {
-        // Cas : L'élève est connecté -> Message commercial de vente
         message = `Bonjour, c'est *${currentUser.nom}* (Classe: ${currentUser.classe}).\n` +
                   `Mon Identifiant est : *${currentUser.id}*.\n\n` +
                   `Je souhaite activer mon *Pack Premium* pour accéder à toutes les vidéos et exercices corrigés. 🚀\n` +
                   `Quels sont les moyens de paiement ?`;
     } else {
-        // Cas : Visiteur non connecté -> Message de curiosité
         message = `Bonjour, je suis intéressé par les cours de SVT Excellence.\n` +
                   `Pouvez-vous m'expliquer comment s'inscrire et comment ça marche ?`;
     }
 
-    // Ouverture de WhatsApp avec le message encodé
     window.open(`https://wa.me/${ADMIN_PHONE}?text=${encodeURIComponent(message)}`, '_blank');
 }
-        // --- AJOUTER CETTE FONCTION DANS LE SCRIPT ---
-
+        
 function orderManual() {
-    // Le message WhatsApp pré-rempli
     const message = `Bonjour SVT Excellence ! 👋\n\n` +
                     `Je suis intéressé par le manuel *Le Dompteur des Sciences de la Vie et de la Terre* 📘.\n\n` +
                     `Je sais qu'il contient :\n` +
@@ -1126,7 +1132,6 @@ function orderManual() {
                     `✅ Des schémas et analyses de documents\n\n` +
                     `Je souhaite le commander. Quel est le prix et comment se passe la livraison ?`;
 
-    // Ouverture de WhatsApp
     window.open(`https://wa.me/${ADMIN_PHONE}?text=${encodeURIComponent(message)}`, '_blank');
 }
         function showStatus(id) { hideAllStatus(); document.getElementById('statusContainer').classList.remove('hidden'); document.getElementById(id).classList.remove('hidden'); document.getElementById('coursesGrid').classList.add('hidden'); }
@@ -1144,26 +1149,22 @@ function orderManual() {
         function switchView(view) {
     currentView = view;
     
-    // Mise à jour visuelle des boutons
     const btnCours = document.getElementById('tabCours');
     const btnAnnales = document.getElementById('tabAnnales');
     
     if (view === 'cours') {
         btnCours.className = "relative z-10 px-6 py-2.5 rounded-xl text-sm font-black transition-all duration-300 bg-slate-900 text-white shadow-md";
         btnAnnales.className = "relative z-10 px-6 py-2.5 rounded-xl text-sm font-bold text-slate-500 transition-all duration-300 hover:text-amber-600 hover:bg-amber-50";
-        // Réafficher les filtres classiques si nécessaire
         document.getElementById('filterContainer').parentNode.classList.remove('hidden');
     } else {
         btnCours.className = "relative z-10 px-6 py-2.5 rounded-xl text-sm font-bold text-slate-500 transition-all duration-300 hover:text-brand-600 hover:bg-slate-50";
         btnAnnales.className = "relative z-10 px-6 py-2.5 rounded-xl text-sm font-black transition-all duration-300 bg-amber-500 text-white shadow-lg shadow-amber-200";
-        // Masquer les filtres de cours car ils ne s'appliquent pas aux annales
         document.getElementById('filterContainer').parentNode.classList.add('hidden');
     }
 
     render();
 }
         function orderAnnale(titre, prix) {
-    // Message insistant et pré-rempli pour faciliter la vente
     const nomClient = currentUser ? currentUser.nom : "un élève";
     const classeClient = currentUser ? currentUser.classe : "non spécifiée";
     
@@ -1176,13 +1177,12 @@ function orderManual() {
 
     window.open(`https://wa.me/${ADMIN_PHONE}?text=${encodeURIComponent(message)}`, '_blank');
 }
-// Code LOcal
+// Code Local
     function getDeviceID() {
     let deviceId = localStorage.getItem('svt_device_id');
     if (!deviceId) {
-        // Crée un identifiant unique aléatoire si c'est la première visite
         deviceId = 'dev_' + Math.random().toString(36).substr(2, 9) + Date.now().toString(36);
-        localStorage.setItem('svt_device_id', deviceId);
+        localStorage.setItem('svt_device_id', deviceId); // On laisse le device_id en localStorage pour le verrouillage par téléphone
     }
     return deviceId;
 }
