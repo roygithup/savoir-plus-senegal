@@ -11,6 +11,11 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
+    <!-- Intégration de KaTeX pour le rendu des formules mathématiques LaTeX -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js" onload="renderMath(document.body);"></script>
+
     <script>
         tailwind.config = {
             theme: {
@@ -51,13 +56,11 @@
         .glass-nav { background: rgba(255, 255, 255, 0.90); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(226, 232, 240, 0.8); }
         .glass-card { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(8px); }
         
-        .course-card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .course-card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); scroll-margin-top: 90px; }
         .course-card:hover { transform: translateY(-6px); box-shadow: 0 20px 35px -10px rgba(37, 99, 235, 0.12); border-color: #bfdbfe; }
         
         .shimmer { background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; }
         @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
-        
-        .text-gradient { background: linear-gradient(135deg, #2563eb 0%, #4f46e5 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
         
         .option-label { cursor: pointer; transition: all 0.2s; }
         .option-radio:checked + .option-content { border-color: #7c3aed; background-color: #f5f3ff; color: #5b21b6; font-weight: 700; box-shadow: 0 4px 10px -2px rgba(124, 58, 237, 0.15); }
@@ -73,6 +76,16 @@
         .subject-tab.active-svt { background-color: #10b981; color: white; border-color: #10b981; box-shadow: 0 4px 14px 0 rgba(16, 185, 129, 0.35); }
         .subject-tab.active-maths { background-color: #dc2626; color: white; border-color: #dc2626; box-shadow: 0 4px 14px 0 rgba(220, 38, 38, 0.35); }
         .subject-tab.active-pc { background-color: #7c3aed; color: white; border-color: #7c3aed; box-shadow: 0 4px 14px 0 rgba(124, 58, 237, 0.35); }
+
+        /* Styles spécifiques pour le lecteur vidéo principal */
+        #mainVideoSection { transition: margin 0.2s ease; }
+        #mainVideoFrame { box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.4); }
+        #mainVideoFrame:fullscreen { width: 100vw !important; height: 100vh !important; border-radius: 0; }
+        #mainVideoFrame:-webkit-full-screen { width: 100vw !important; height: 100vh !important; border-radius: 0; }
+        #mainVideoFrame:fullscreen iframe,
+        #mainVideoFrame:-webkit-full-screen iframe { top: 0 !important; height: 100% !important; }
+        
+        .video-help-banner { animation: fadeIn 0.4s ease-out; }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-900 min-h-screen font-sans antialiased selection:bg-brand-100 selection:text-brand-900 flex flex-col">
@@ -104,6 +117,9 @@
                 </div>
 
                 <div id="navUserDisplay" class="hidden flex items-center gap-2 sm:gap-3">
+                    <button id="adminPanelBtn" onclick="openAdminModal()" class="hidden bg-purple-600 hover:bg-purple-700 text-white px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-md">
+                        <i class="fas fa-user-shield"></i> <span>Panneau Admin</span>
+                    </button>
                     <div id="subscriptionStatus" class="flex items-center"></div>
                     <div class="flex items-center gap-2 bg-white px-3 py-1.5 rounded-full border border-slate-200 shadow-sm">
                         <div class="w-7 h-7 rounded-full bg-gradient-to-br from-brand-500 to-indigo-600 text-white flex items-center justify-center text-xs font-bold ring-2 ring-white" id="userInitialNav">?</div>
@@ -129,7 +145,7 @@
                 <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-brand-500 to-indigo-600 flex items-center justify-center font-black text-xl text-white shadow-lg shadow-brand-900/50" id="userInitial">U</div>
                 <div>
                     <div class="flex items-center gap-2 mb-0.5">
-                        <p class="text-[10px] text-brand-300 font-bold uppercase tracking-widest">Espace Élève</p>
+                        <p class="text-[10px] text-brand-300 font-bold uppercase tracking-widest" id="welcomeRoleText">Espace Élève</p>
                         <span id="welcomeSubBadge" class="hidden text-[10px] font-black px-2.5 py-0.5 rounded-full border"></span>
                     </div>
                     <p class="font-extrabold text-lg sm:text-xl tracking-tight" id="welcomeUserText">Nom de l'élève</p>
@@ -160,7 +176,6 @@
                 </p>
             </div>
 
-            <!-- Dynamic Search & Filter Card -->
             <div class="lg:w-5/12 w-full">
                 <div class="bg-white/90 backdrop-blur-xl p-6 rounded-[2rem] border border-slate-100 shadow-2xl shadow-brand-900/5 relative">
                     <h3 class="text-lg font-black text-slate-900 mb-5 flex items-center justify-between">
@@ -193,8 +208,9 @@
     </header>
 
     <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 py-10 w-full">
-        
-        <!-- Subject Switcher -->
+        <!-- LECTEUR VIDÉO PRINCIPAL DÉDIÉ (HORS DES CARTES) -->
+        <div id="mainVideoSection" class="hidden mb-8 flex flex-col items-center scroll-mt-24"></div>
+
         <div class="flex flex-wrap justify-center gap-2.5 sm:gap-3 mb-6">
             <button onclick="switchMatiere('SVT')" id="btnMatSVT" class="subject-tab active-svt px-5 sm:px-6 py-3 rounded-2xl text-xs sm:text-sm font-bold transition-all duration-300 border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 flex items-center gap-2">
                 <i class="fas fa-leaf"></i> SVT
@@ -207,7 +223,6 @@
             </button>
         </div>
 
-        <!-- Content Type Switcher -->
         <div class="flex justify-center mb-8">
             <div class="bg-white p-1.5 rounded-2xl border border-slate-200 shadow-sm inline-flex relative">
                 <button onclick="switchView('cours')" id="tabCours" class="relative z-10 px-5 sm:px-6 py-2 rounded-xl text-xs sm:text-sm font-black transition-all duration-300 bg-slate-900 text-white shadow-md">
@@ -280,6 +295,7 @@
         </div>
     </footer>
 
+    <!-- Modal d'authentification -->
     <div id="authModal" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 bg-slate-900/70 backdrop-blur-sm transition-opacity duration-300">
         <div class="bg-white rounded-[2.5rem] p-6 sm:p-8 max-w-md w-full shadow-2xl relative max-h-[90vh] overflow-y-auto animate-slide-up">
             <button onclick="closeAuthModal()" class="absolute top-5 right-5 text-slate-400 hover:text-slate-900 transition h-9 w-9 flex items-center justify-center bg-slate-50 hover:bg-slate-100 rounded-full">
@@ -305,7 +321,7 @@
                     </div>
                     <div>
                         <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1.5 ml-1">Ton Prénom et Nom</label>
-                        <input type="text" id="regFullName" placeholder="Ex: Moussa Diop" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:bg-white outline-none transition font-bold text-xs sm:text-sm text-slate-700">
+                        <input type="text" id="regFullName" placeholder="Ex: Moussa Diop" maxlength="80" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:bg-white outline-none transition font-bold text-xs sm:text-sm text-slate-700">
                     </div>
                     <div>
                         <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1.5 ml-1">Ta Classe</label>
@@ -322,8 +338,8 @@
 
                 <div id="loginFields">
                     <div>
-                        <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2 text-center">Ton Code ID (4 caractères)</label>
-                        <input type="text" id="loginID" maxlength="4" placeholder="EX: E8A1" class="w-full px-4 py-4 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 outline-none transition uppercase text-center text-2xl sm:text-3xl font-black tracking-[0.4em] shadow-inner text-brand-600 placeholder-slate-300">
+                        <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2 text-center">Ton Code d'accès (ID)</label>
+                        <input type="text" id="loginID" maxlength="30" placeholder="EX: E8A1" class="w-full px-4 py-4 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 outline-none transition uppercase text-center text-xl sm:text-2xl font-black tracking-widest shadow-inner text-brand-600 placeholder-slate-300">
                         <p class="text-center text-[10px] text-slate-400 mt-2">Saisis le code reçu lors de ton inscription.</p>
                     </div>
                 </div>
@@ -343,6 +359,7 @@
         </div>
     </div>
 
+    <!-- Modal Quiz -->
     <div id="quizModal" class="hidden fixed inset-0 z-[120] flex items-center justify-center p-4 bg-slate-900/80 backdrop-blur-md transition-opacity duration-300">
         <div class="bg-white rounded-[2rem] w-full max-w-2xl shadow-2xl relative flex flex-col h-[85vh] md:h-auto max-h-[90vh] animate-slide-up border border-slate-200">
             <div class="p-5 border-b border-slate-100 flex flex-col bg-slate-50/60 rounded-t-[2rem]">
@@ -392,6 +409,7 @@
         </div>
     </div>
 
+    <!-- Modal Packs / Abonnements -->
     <div id="premiumOptionsModal" class="hidden fixed inset-0 z-[110] flex items-center justify-center p-4 sm:p-6 bg-slate-900/80 backdrop-blur-md overflow-y-auto">
         <div class="bg-white rounded-[2rem] w-full max-w-4xl shadow-2xl relative animate-slide-up my-auto">
             <button onclick="closePremiumOptionsModal()" class="absolute top-4 right-4 z-10 text-slate-400 hover:text-slate-900 transition h-9 w-9 flex items-center justify-center bg-slate-50 hover:bg-slate-100 rounded-full">
@@ -407,7 +425,7 @@
             <div class="p-6 md:p-8 grid grid-cols-1 md:grid-cols-3 gap-5 bg-slate-50 rounded-b-[2rem]">
                 <div class="bg-white rounded-3xl p-5 border border-slate-200 shadow-sm hover:shadow-xl transition-all flex flex-col">
                     <div class="text-slate-500 text-xs font-bold uppercase tracking-wider mb-1">Pack Solo</div>
-                    <div class="text-2xl font-black text-slate-900 mb-3">2 000 FCFA<span class="text-xs text-slate-400 font-medium">/mois</span></div>
+                    <div class="text-2xl font-black text-slate-900 mb-3"><span id="priceDisplaySolo">2 000</span> FCFA<span class="text-xs text-slate-400 font-medium">/mois</span></div>
                     <ul class="space-y-2.5 mb-6 flex-grow text-xs text-slate-600 font-medium">
                         <li class="flex gap-2"><i class="fas fa-check-circle text-emerald-500 mt-0.5"></i> 1 Matière au choix</li>
                         <li class="flex gap-2"><i class="fas fa-check-circle text-emerald-500 mt-0.5"></i> Cours, Vidéos & PDF</li>
@@ -418,7 +436,7 @@
 
                 <div class="bg-white rounded-3xl p-5 border border-slate-200 shadow-sm hover:shadow-xl transition-all flex flex-col">
                     <div class="text-slate-500 text-xs font-bold uppercase tracking-wider mb-1">Pack Duo</div>
-                    <div class="text-2xl font-black text-slate-900 mb-3">3 500 FCFA<span class="text-xs text-slate-400 font-medium">/mois</span></div>
+                    <div class="text-2xl font-black text-slate-900 mb-3"><span id="priceDisplayDuo">3 500</span> FCFA<span class="text-xs text-slate-400 font-medium">/mois</span></div>
                     <ul class="space-y-2.5 mb-6 flex-grow text-xs text-slate-600 font-medium">
                         <li class="flex gap-2"><i class="fas fa-check-circle text-emerald-500 mt-0.5"></i> 2 Matières au choix</li>
                         <li class="flex gap-2"><i class="fas fa-check-circle text-emerald-500 mt-0.5"></i> Cours, Vidéos & PDF</li>
@@ -430,7 +448,7 @@
                 <div class="bg-slate-900 rounded-3xl p-5 border border-slate-800 shadow-xl relative flex flex-col md:-translate-y-2">
                     <div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-amber-400 to-orange-500 text-white text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded-full shadow-md">Recommandé</div>
                     <div class="text-brand-300 text-xs font-bold uppercase tracking-wider mb-1 mt-1">Pack Excellence</div>
-                    <div class="text-2xl font-black text-white mb-3">5 000 FCFA<span class="text-xs text-slate-400 font-medium">/mois</span></div>
+                    <div class="text-2xl font-black text-white mb-3"><span id="priceDisplayExcellence">5 000</span> FCFA<span class="text-xs text-slate-400 font-medium">/mois</span></div>
                     <ul class="space-y-2.5 mb-6 flex-grow text-xs text-slate-300 font-medium">
                         <li class="flex gap-2"><i class="fas fa-check-circle text-brand-400 mt-0.5"></i> SVT + Maths + PC</li>
                         <li class="flex gap-2"><i class="fas fa-check-circle text-brand-400 mt-0.5"></i> Accès total illimité</li>
@@ -444,6 +462,7 @@
         </div>
     </div>
 
+    <!-- Modal Sélection Matières -->
     <div id="subjectSelectionModal" class="hidden fixed inset-0 z-[115] flex items-center justify-center p-4 sm:p-6 bg-slate-900/80 backdrop-blur-md overflow-y-auto">
         <div class="bg-white rounded-[2rem] p-6 sm:p-8 max-w-md w-full shadow-2xl relative animate-slide-up my-auto">
             <button onclick="closeSubjectSelectionModal()" class="absolute top-5 right-5 text-slate-400 hover:text-slate-900 transition h-9 w-9 flex items-center justify-center bg-slate-50 hover:bg-slate-100 rounded-full" title="Retour">
@@ -482,6 +501,176 @@
         </div>
     </div>
 
+    <!-- Modal Dashboard Administration -->
+    <div id="adminModal" class="hidden fixed inset-0 z-[150] flex items-center justify-center p-4 sm:p-6 bg-slate-900/80 backdrop-blur-md overflow-y-auto">
+        <div class="bg-white rounded-[2.5rem] w-full max-w-5xl shadow-2xl relative my-auto p-6 sm:p-8 max-h-[90vh] overflow-y-auto border border-slate-200">
+            <button onclick="closeAdminModal()" class="absolute top-5 right-5 text-slate-400 hover:text-slate-900 transition h-9 w-9 flex items-center justify-center bg-slate-100 rounded-full">
+                <i class="fas fa-times"></i>
+            </button>
+
+            <div class="flex items-center gap-3 mb-6 pb-4 border-b border-slate-100">
+                <div class="bg-purple-100 text-purple-700 p-3 rounded-2xl">
+                    <i class="fas fa-user-shield text-2xl"></i>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-black text-slate-900">Panneau d'Administration</h2>
+                    <p class="text-xs text-slate-500 font-medium">Gestion globale de la plateforme Excellence Académie</p>
+                </div>
+            </div>
+
+            <div class="flex flex-wrap gap-2 border-b border-slate-200 mb-6 pb-3">
+                <button onclick="switchAdminTab('eleves')" id="tabAdminEleves" class="px-4 py-2 rounded-xl text-xs font-bold bg-purple-600 text-white shadow-sm">
+                    <i class="fas fa-users mr-1.5"></i> Élèves & Accès
+                </button>
+                <button onclick="switchAdminTab('cours')" id="tabAdminCours" class="px-4 py-2 rounded-xl text-xs font-bold bg-slate-100 text-slate-600 hover:bg-slate-200">
+                    <i class="fas fa-book-open mr-1.5"></i> Gestion des Cours
+                </button>
+                <button onclick="switchAdminTab('annales')" id="tabAdminAnnales" class="px-4 py-2 rounded-xl text-xs font-bold bg-slate-100 text-slate-600 hover:bg-slate-200">
+                    <i class="fas fa-file-invoice mr-1.5"></i> Gestion des Annales
+                </button>
+                <button onclick="switchAdminTab('params')" id="tabAdminParams" class="px-4 py-2 rounded-xl text-xs font-bold bg-slate-100 text-slate-600 hover:bg-slate-200">
+                    <i class="fas fa-cog mr-1.5"></i> Prix & Paramètres
+                </button>
+            </div>
+
+            <!-- Section 1 : Gestion Élèves -->
+            <div id="adminSectionEleves" class="space-y-4">
+                <div class="flex justify-between items-center mb-3">
+                    <input type="text" id="searchAdminEleve" oninput="renderAdminEleves()" placeholder="Rechercher par nom ou code ID..." class="px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold w-full max-w-xs">
+                    <span id="elevesCount" class="text-xs font-bold text-slate-400"></span>
+                </div>
+                <div class="overflow-x-auto rounded-2xl border border-slate-200">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-slate-50 text-[11px] uppercase text-slate-400 font-extrabold border-b border-slate-200">
+                                <th class="p-3">ID</th>
+                                <th class="p-3">Élève & Classe</th>
+                                <th class="p-3">Abonnements</th>
+                                <th class="p-3">Expiration</th>
+                                <th class="p-3">Statut</th>
+                                <th class="p-3 text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="adminElevesTable" class="divide-y divide-slate-100 text-xs"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Section 2 : Gestion des Cours -->
+            <div id="adminSectionCours" class="hidden space-y-6">
+                <div class="bg-slate-50 p-5 rounded-2xl border border-slate-200">
+                    <h3 class="text-sm font-black text-slate-800 mb-3"><i class="fas fa-plus-circle text-brand-600 mr-1.5"></i> Ajouter un nouveau cours</h3>
+                    <form onsubmit="handleCreateCours(event)" class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                        <input type="text" id="newCoursTitre" placeholder="Titre du cours *" required maxlength="120" class="px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-semibold outline-none focus:ring-2 focus:ring-brand-500">
+                        <select id="newCoursMatiere" required class="px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-semibold">
+                            <option value="SVT">SVT</option>
+                            <option value="MATHS">Mathématiques</option>
+                            <option value="PC">Physique - Chimie</option>
+                        </select>
+                        <select id="newCoursClasse" required class="px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-semibold">
+                            <option value="Terminale">Terminale</option>
+                            <option value="1ère S">1ère S</option>
+                            <option value="2nd S">2nd S</option>
+                            <option value="3ème">3ème</option>
+                            <option value="4ème">4ème</option>
+                        </select>
+                        <select id="newCoursAcces" required class="px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-semibold">
+                            <option value="premium">Premium</option>
+                            <option value="free">Gratuit</option>
+                        </select>
+                        <input type="text" id="newCoursVid" placeholder="ID Vidéo Google Drive" maxlength="100" class="px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-semibold outline-none focus:ring-2 focus:ring-brand-500">
+                        <input type="text" id="newCoursExos" placeholder="Lien Exercices (URL)" maxlength="255" class="px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-semibold outline-none focus:ring-2 focus:ring-brand-500">
+                        <input type="text" id="newCoursPdf" placeholder="Lien PDF (URL)" maxlength="255" class="px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-semibold outline-none focus:ring-2 focus:ring-brand-500 col-span-1 md:col-span-2">
+                        <button type="submit" class="px-4 py-2.5 bg-brand-900 text-white rounded-xl font-bold text-xs hover:bg-brand-700 transition flex items-center justify-center gap-2">
+                            <i class="fas fa-save"></i> Enregistrer le cours
+                        </button>
+                    </form>
+                </div>
+                <div class="overflow-x-auto rounded-2xl border border-slate-200">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-slate-50 text-[11px] uppercase text-slate-400 font-extrabold border-b border-slate-200">
+                                <th class="p-3">ID</th>
+                                <th class="p-3">Titre & Matière</th>
+                                <th class="p-3">Classe</th>
+                                <th class="p-3">Accès</th>
+                                <th class="p-3 text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="adminCoursTable" class="divide-y divide-slate-100 text-xs"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Section 3 : Gestion des Annales -->
+            <div id="adminSectionAnnales" class="hidden space-y-6">
+                <div class="bg-slate-50 p-5 rounded-2xl border border-slate-200">
+                    <h3 class="text-sm font-black text-slate-800 mb-3"><i class="fas fa-plus-circle text-amber-600 mr-1.5"></i> Ajouter une annale</h3>
+                    <form onsubmit="handleCreateAnnale(event)" class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                        <input type="text" id="newAnnaleTitre" placeholder="Titre de l'annale *" required maxlength="120" class="px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-semibold outline-none">
+                        <select id="newAnnaleMatiere" required class="px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-semibold">
+                            <option value="SVT">SVT</option>
+                            <option value="MATHS">Mathématiques</option>
+                            <option value="PC">Physique - Chimie</option>
+                        </select>
+                        <input type="number" id="newAnnalePrix" placeholder="Prix en FCFA *" required min="0" max="1000000" class="px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-semibold outline-none">
+                        <input type="text" id="newAnnalePdf" placeholder="Lien Extrait PDF *" required maxlength="255" class="px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-semibold outline-none col-span-1 md:col-span-2">
+                        <button type="submit" class="px-4 py-2.5 bg-amber-600 text-white rounded-xl font-bold text-xs hover:bg-amber-700 transition flex items-center justify-center gap-2">
+                            <i class="fas fa-save"></i> Enregistrer l'annale
+                        </button>
+                    </form>
+                </div>
+                <div class="overflow-x-auto rounded-2xl border border-slate-200">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-slate-50 text-[11px] uppercase text-slate-400 font-extrabold border-b border-slate-200">
+                                <th class="p-3">ID</th>
+                                <th class="p-3">Titre & Matière</th>
+                                <th class="p-3">Prix</th>
+                                <th class="p-3 text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="adminAnnalesTable" class="divide-y divide-slate-100 text-xs"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Section 4 : Gestion des Paramètres et Prix -->
+            <div id="adminSectionParams" class="hidden space-y-6">
+                <div class="bg-slate-50 p-5 rounded-2xl border border-slate-200 max-w-xl">
+                    <h3 class="text-sm font-black text-slate-800 mb-4"><i class="fas fa-sliders-h text-purple-600 mr-1.5"></i> Configuration de la plateforme</h3>
+                    <form onsubmit="handleSaveParams(event)" class="space-y-4">
+                        <div>
+                            <label class="block text-[11px] font-bold text-slate-400 uppercase mb-1">Code Administrateur Secret</label>
+                            <input type="text" id="paramCodeAdmin" required maxlength="50" class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-black uppercase text-purple-700">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-bold text-slate-400 uppercase mb-1">Numéro WhatsApp Support / Vente</label>
+                            <input type="text" id="paramWhatsapp" required maxlength="25" class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-700">
+                        </div>
+                        <div class="pt-2 border-t border-slate-200 grid grid-cols-3 gap-3">
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Prix Pack Solo</label>
+                                <input type="number" id="paramPrixSolo" required min="0" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Prix Pack Duo</label>
+                                <input type="number" id="paramPrixDuo" required min="0" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Prix Excellence</label>
+                                <input type="number" id="paramPrixExcellence" required min="0" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold">
+                            </div>
+                        </div>
+                        <button type="submit" class="w-full py-3 bg-purple-700 text-white rounded-xl font-bold text-xs shadow-md hover:bg-purple-800 transition">
+                            <i class="fas fa-save mr-1.5"></i> Mettre à jour les paramètres
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         // Supabase configuration
         const SUPABASE_URL = 'https://nqbyxogfvkmluakwmkmu.supabase.co';
@@ -493,7 +682,8 @@
         let adminPhone = "221768776668";
         let dbParameters = {};
         let allCourses = [];
-        let allAnnales = [];         
+        let allAnnales = []; 
+        let allEleves = [];        
         let currentView = 'cours';   
         let currentFilter = 'all';
         let currentMatiere = 'SVT'; 
@@ -509,6 +699,7 @@
         let currentQuizData = null; 
         let currentQuestionIndex = 0;
         let quizUserAnswers = {}; 
+        let currentVideoExternal = '';
 
         const quotes = [
             "Le succès est la somme de petits efforts répétés jour après jour.",
@@ -516,6 +707,76 @@
             "L'excellence n'est pas un acte, mais une habitude.",
             "Ton BAC et ton BFEM se préparent dès aujourd'hui."
         ];
+
+        // ============================================================
+        // DÉTECTION D'APPAREIL ET DE NAVIGATEUR
+        // ============================================================
+        
+        function isMobileDevice() {
+            return /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent) 
+                || (navigator.maxTouchPoints > 1 && window.innerWidth < 900);
+        }
+
+        function isInAppBrowser() {
+            const ua = navigator.userAgent || '';
+            return /FBAN|FBAV|Instagram|WhatsApp|Line\/|Twitter|MicroMessenger|Snapchat/i.test(ua);
+        }
+
+        function isIOS() {
+            return /iPhone|iPad|iPod/i.test(navigator.userAgent) 
+                || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+        }
+
+        // Fonction de nettoyage anti-XSS et sécurisation des chaînes
+        // (idempotente : décode d'abord les entités déjà présentes pour éviter le double échappement,
+        //  ce qui cassait les formules contenant < > & ou ')
+        function sanitizeInput(str) {
+            if (!str) return '';
+            return String(str)
+                .replace(/&#x27;/g, "'")
+                .replace(/&quot;/g, '"')
+                .replace(/&lt;/g, '<')
+                .replace(/&gt;/g, '>')
+                .replace(/&amp;/g, '&')
+                .trim()
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#x27;');
+        }
+
+        // Argument JS sûr pour un attribut onclick="..." : conserve les \ (LaTeX) et les apostrophes
+        function jsArg(str) {
+            const raw = String(str == null ? '' : str)
+                .replace(/&#x27;/g, "'").replace(/&quot;/g, '"')
+                .replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&')
+                .trim();
+            return JSON.stringify(raw)
+                .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;').replace(/'/g, '&#x27;');
+        }
+
+        // Rendu LaTeX (KaTeX) : attend que auto-render soit chargé si besoin
+        const MATH_OPTIONS = {
+            delimiters: [
+                {left: '$$', right: '$$', display: true},
+                {left: '\\[', right: '\\]', display: true},
+                {left: '\\(', right: '\\)', display: false},
+                {left: '$', right: '$', display: false}
+            ],
+            throwOnError: false,
+            strict: false
+        };
+        function renderMath(el, tries) {
+            if (!el) return;
+            if (typeof renderMathInElement === 'function' && typeof katex !== 'undefined') {
+                try { renderMathInElement(el, MATH_OPTIONS); } catch (e) { console.warn('KaTeX:', e); }
+                return;
+            }
+            tries = tries || 0;
+            if (tries < 50) setTimeout(() => renderMath(el, tries + 1), 100);
+        }
 
         window.addEventListener('DOMContentLoaded', () => {
             try {
@@ -536,12 +797,19 @@
             init();
             
             document.getElementById('searchInput').addEventListener('input', (e) => { 
-                searchQuery = e.target.value.trim(); 
+                searchQuery = sanitizeInput(e.target.value); 
                 render(); 
             });
             document.querySelectorAll('.filter-btn').forEach(btn => {
                 btn.addEventListener('click', (e) => handleFilterClick(e.target));
             });
+
+            // Alerte WebView in-app
+            if (isInAppBrowser()) {
+                setTimeout(() => {
+                    showToast("Pour une meilleure lecture des vidéos, ouvrez ce site dans Chrome ou Safari.", "warning");
+                }, 1500);
+            }
         });
 
         async function loadParametersFromDB() {
@@ -551,17 +819,22 @@
                     data.forEach(item => {
                         dbParameters[item.cle] = item.valeur;
                     });
-                    if (dbParameters['whatsapp_phone']) {
-                        adminPhone = dbParameters['whatsapp_phone'];
-                    }
+                    if (dbParameters['whatsapp_phone']) adminPhone = sanitizeInput(dbParameters['whatsapp_phone']);
+                    updatePricesInUI();
                 }
             } catch (e) {
                 console.warn("Utilisation des paramètres par défaut");
             }
         }
 
+        function updatePricesInUI() {
+            if (dbParameters['prix_solo']) document.getElementById('priceDisplaySolo').innerText = Number(dbParameters['prix_solo']).toLocaleString();
+            if (dbParameters['prix_duo']) document.getElementById('priceDisplayDuo').innerText = Number(dbParameters['prix_duo']).toLocaleString();
+            if (dbParameters['prix_excellence']) document.getElementById('priceDisplayExcellence').innerText = Number(dbParameters['prix_excellence']).toLocaleString();
+        }
+
         async function verifyUserStatusSilently() {
-            if (!currentUser || !currentUser.id) return;
+            if (!currentUser || !currentUser.id || currentUser.isAdmin) return;
             try {
                 const { data, error } = await sbClient
                     .from('eleves')
@@ -581,11 +854,11 @@
                         updateUIForUser(); 
                     }
                 }
-            } catch(e) { console.warn("Vérification utilisateur silencieuse ignorée"); }
+            } catch(e) { console.warn("Vérification silencieuse ignorée"); }
         }
 
         function checkLocalExpiration() {
-            if (currentUser) {
+            if (currentUser && !currentUser.isAdmin) {
                 if (currentUser.login_time && (Date.now() - currentUser.login_time > 86400000)) {
                     logout();
                     showToast("Ta session de 24h a expiré. Connecte-toi à nouveau.", "warning");
@@ -682,16 +955,17 @@
                                 <i class="fas fa-file-invoice-dollar"></i>
                             </div>
                             <div>
-                                <h3 class="text-base font-extrabold text-slate-900 leading-tight mb-1">${annale.titre}</h3>
+                                <h3 class="text-base font-extrabold text-slate-900 leading-tight mb-1">${sanitizeInput(annale.titre)}</h3>
                                 <div class="text-xl font-black text-amber-600">${roundedPrice} FCFA <span class="text-xs text-slate-400 font-medium line-through ml-1">${oldPrice} FCFA</span></div>
                             </div>
                         </div>
                         <div class="mt-auto grid grid-cols-2 gap-2.5 pt-3">
-                            <button onclick="window.open('${annale.url_pdf}', '_blank')" class="px-3 py-2.5 bg-white text-slate-700 border border-slate-200 rounded-xl font-bold text-xs hover:bg-slate-50 transition"><i class="fas fa-eye mr-1"></i> Extrait PDF</button>
-                            <button onclick="orderAnnale('${annale.titre}', '${roundedPrice}')" class="px-3 py-2.5 bg-slate-900 text-white rounded-xl font-bold text-xs hover:bg-amber-600 shadow-md transition flex items-center justify-center gap-1.5"><span>Commander</span> <i class="fab fa-whatsapp text-sm"></i></button>
+                            <button onclick="window.open('${sanitizeInput(annale.url_pdf)}', '_blank')" class="px-3 py-2.5 bg-white text-slate-700 border border-slate-200 rounded-xl font-bold text-xs hover:bg-slate-50 transition"><i class="fas fa-eye mr-1"></i> Extrait PDF</button>
+                            <button onclick="orderAnnale(${jsArg(annale.titre)}, '${roundedPrice}')" class="px-3 py-2.5 bg-slate-900 text-white rounded-xl font-bold text-xs hover:bg-amber-600 shadow-md transition flex items-center justify-center gap-1.5"><span>Commander</span> <i class="fab fa-whatsapp text-sm"></i></button>
                         </div>`;
                     grid.appendChild(card);
                 }); 
+                renderMath(grid);
                 return; 
             }
 
@@ -699,7 +973,7 @@
                 const matchesSearch = c.titre.toLowerCase().includes(searchQuery.toLowerCase());
                 const matchesMatiere = c.matiere === currentMatiere;
                 let matchesCategory = true;
-                if (currentUser) {
+                if (currentUser && !currentUser.isAdmin) {
                     if (c.classe !== currentUser.classe) matchesCategory = false; 
                     else if (currentFilter === 'free') matchesCategory = c.type_acces === 'free';
                 } else {
@@ -718,7 +992,7 @@
                 card.style.animationDelay = `${index * 40}ms`;
                 
                 const objectifsHtml = (course.cours_objectifs || []).slice(0, 3).map(o => 
-                    `<div class="flex items-start gap-2 text-xs font-medium text-slate-500"><i class="fas fa-check text-brand-400 mt-0.5 text-[10px]"></i><span class="leading-relaxed">${o.description}</span></div>`
+                    `<div class="flex items-start gap-2 text-xs font-medium text-slate-500"><i class="fas fa-check text-brand-400 mt-0.5 text-[10px]"></i><span class="leading-relaxed">${sanitizeInput(o.description)}</span></div>`
                 ).join('');
 
                 let iconClass = 'fa-book'; 
@@ -727,33 +1001,221 @@
                 if(currentMatiere === 'MATHS') { iconClass = 'fa-calculator'; iconColor = 'bg-red-50 text-red-600'; }
                 if(currentMatiere === 'PC') { iconClass = 'fa-atom'; iconColor = 'bg-purple-50 text-purple-600'; }
 
+                const videoId = sanitizeInput(course.url_vid || '');
+
                 card.innerHTML = `
                     <div class="flex justify-between items-start mb-5">
-                        <div class="w-12 h-12 ${iconColor} rounded-2xl flex items-center justify-center text-lg shadow-sm transition-colors duration-300 relative">
-                            <i class="fas ${course.icone || iconClass}"></i>
+                        <div class="flex items-center gap-3">
+                            <div class="w-12 h-12 ${iconColor} rounded-2xl flex items-center justify-center text-lg shadow-sm transition-colors duration-300 relative">
+                                <i class="fas ${sanitizeInput(course.icone || iconClass)}"></i>
+                            </div>
+                            <div>
+                                <span class="text-[9px] font-black uppercase tracking-wider text-slate-400 bg-slate-50 px-2 py-0.5 rounded-md border border-slate-100">${sanitizeInput(course.classe)}</span>
+                                <h3 class="text-base sm:text-lg font-extrabold text-slate-900 leading-tight mt-1 group-hover:text-brand-600 transition-colors">${sanitizeInput(course.titre)}</h3>
+                            </div>
                         </div>
                         <span class="px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-wide border ${isPremium ? 'bg-amber-50 text-amber-600 border-amber-100' : 'bg-emerald-50 text-emerald-600 border-emerald-100'}">
                             ${isPremium ? '<i class="fas fa-crown mr-1"></i> Premium' : 'Gratuit'}
                         </span>
                     </div>
-                    <div class="flex-grow">
-                        <div class="flex items-center gap-2 mb-2">
-                            <span class="text-[9px] font-black uppercase tracking-wider text-slate-400 bg-slate-50 px-2 py-0.5 rounded-md border border-slate-100">${course.classe}</span>
-                        </div>
-                        <h3 class="text-base sm:text-lg font-extrabold text-slate-900 leading-tight mb-3 group-hover:text-brand-600 transition-colors line-clamp-2">${course.titre}</h3>
-                        <div class="space-y-2 mb-5">${objectifsHtml || '<p class="text-xs text-slate-400 italic">Objectifs du cours en cours de mise à jour.</p>'}</div>
+                    
+                    <div class="flex-grow mb-5">
+                        <div class="space-y-2">${objectifsHtml || '<p class="text-xs text-slate-400 italic">Objectifs du cours en cours de mise à jour.</p>'}</div>
                     </div>
-                    <div class="grid grid-cols-2 lg:grid-cols-4 gap-2 pt-4 border-t border-slate-100 mt-auto">
-                        <button onclick="handleAccess('${course.url_vid}', ${isPremium}, '${course.matiere}')" class="flex flex-col items-center justify-center gap-1 py-2.5 rounded-xl bg-slate-900 text-white font-bold text-[10px] hover:bg-slate-800 transition-all active:scale-95 shadow-sm"><i class="fas fa-play text-xs"></i> Vidéo</button>
-                        <button onclick="handleAccess('${course.url_exos}', ${isPremium}, '${course.matiere}')" class="flex flex-col items-center justify-center gap-1 py-2.5 rounded-xl bg-amber-500 text-white font-bold text-[10px] hover:bg-amber-600 transition-all active:scale-95 shadow-sm"><i class="fas fa-tasks text-xs"></i> Exos</button>
-                        <button onclick="handleQuizAccess('${course.id}', '${course.titre}', ${isPremium}, '${course.matiere}')" class="flex flex-col items-center justify-center gap-1 py-2.5 rounded-xl bg-quiz-600 text-white font-bold text-[10px] hover:bg-quiz-700 transition-all active:scale-95 shadow-sm"><i class="fas fa-brain text-xs"></i> Quiz</button>
-                        <button onclick="handleAccess('${course.url_pdf}', ${isPremium}, '${course.matiere}')" class="flex flex-col items-center justify-center gap-1 py-2.5 rounded-xl bg-slate-50 text-slate-600 font-bold text-[10px] hover:bg-slate-100 border border-slate-200 transition-all active:scale-95"><i class="fas fa-file-pdf text-xs"></i> PDF</button>
+
+                    <div class="mb-4">
+                        <button onclick="playMainVideo('${videoId}', ${jsArg(course.titre)}, ${isPremium}, '${course.matiere}')" class="w-full px-4 py-3 bg-slate-900 text-white font-bold text-xs rounded-xl flex items-center justify-center gap-2 hover:bg-brand-600 transition shadow-md active:scale-95">
+                            <i class="fas fa-play-circle text-brand-400 text-sm"></i>
+                            <span>Voir la vidéo</span>
+                        </button>
+                    </div>
+
+                    <div class="grid grid-cols-3 gap-2 pt-4 border-t border-slate-100 mt-auto">
+                        <button onclick="handleAccess('${sanitizeInput(course.url_exos)}', ${isPremium}, '${course.matiere}')" class="flex flex-col items-center justify-center gap-1 py-2.5 rounded-xl bg-amber-500 text-white font-bold text-[10px] hover:bg-amber-600 transition-all active:scale-95 shadow-sm"><i class="fas fa-tasks text-xs"></i> Exos</button>
+                        <button onclick="handleQuizAccess('${course.id}', ${jsArg(course.titre)}, ${isPremium}, '${course.matiere}')" class="flex flex-col items-center justify-center gap-1 py-2.5 rounded-xl bg-quiz-600 text-white font-bold text-[10px] hover:bg-quiz-700 transition-all active:scale-95 shadow-sm"><i class="fas fa-brain text-xs"></i> Quiz</button>
+                        <button onclick="handleAccess('${sanitizeInput(course.url_pdf)}', ${isPremium}, '${course.matiere}')" class="flex flex-col items-center justify-center gap-1 py-2.5 rounded-xl bg-slate-50 text-slate-600 font-bold text-[10px] hover:bg-slate-100 border border-slate-200 transition-all active:scale-95"><i class="fas fa-file-pdf text-xs"></i> PDF</button>
                     </div>`;
                 grid.appendChild(card);
             });
+
+            renderMath(grid);
+        }
+
+        // ============================================================
+        // LECTEUR VIDÉO PRINCIPAL (ZONE DÉDIÉE HORS DES CARTES)
+        // ============================================================
+        function buildVideoSource(raw) {
+            const v = String(raw || '').trim();
+            if (!v || v === 'null' || v === 'undefined') return null;
+            if (/^[A-Za-z0-9_-]{10,}$/.test(v)) {
+                return { embed: 'https://drive.google.com/file/d/' + v + '/preview', external: 'https://drive.google.com/file/d/' + v + '/view' };
+            }
+            if (!/^https:\/\//i.test(v)) return null;
+            let u;
+            try { u = new URL(v); } catch (e) { return null; }
+            const host = u.hostname.replace(/^www\./, '');
+            if (host === 'drive.google.com') {
+                const m = u.pathname.match(/\/file\/d\/([A-Za-z0-9_-]+)/);
+                const id = m ? m[1] : u.searchParams.get('id');
+                if (id && /^[A-Za-z0-9_-]+$/.test(id)) {
+                    return { embed: 'https://drive.google.com/file/d/' + id + '/preview', external: 'https://drive.google.com/file/d/' + id + '/view' };
+                }
+            }
+            if (host === 'youtu.be' || host.endsWith('youtube.com')) {
+                let id = host === 'youtu.be' ? u.pathname.slice(1) : (u.searchParams.get('v') || (u.pathname.match(/\/(?:embed|shorts)\/([^/]+)/) || [])[1]);
+                if (id && /^[A-Za-z0-9_-]+$/.test(id)) {
+                    return { embed: 'https://www.youtube-nocookie.com/embed/' + id + '?rel=0&playsinline=1', external: 'https://www.youtube.com/watch?v=' + id };
+                }
+            }
+            return { embed: v, external: v };
+        }
+
+        // Hauteur (px) de la barre noire que le lecteur Google Drive ajoute en haut de son iframe.
+        // Réduite sur mobile où la barre Drive est plus compacte.
+        function getDriveBarPx() {
+            return isMobileDevice() ? 48 : 56;
+        }
+
+        function playMainVideo(videoId, titre, isPremium, matiere) {
+            if (checkPremiumLock(isPremium, matiere)) return;
+
+            const src = buildVideoSource(videoId);
+            if (!src) {
+                showToast("Vidéo non renseignée pour ce cours.", "warning");
+                return;
+            }
+            currentVideoExternal = src.external;
+
+            const section = document.getElementById('mainVideoSection');
+            const isDrive = /(^|\.)drive\.google\.com$/.test(new URL(src.embed).hostname);
+            const off = isDrive ? getDriveBarPx() : 0;
+            const mobile = isMobileDevice();
+            const inApp = isInAppBrowser();
+
+            // Construction du HTML du lecteur
+            let html = `
+                <div id="mainVideoFrame" class="relative w-full bg-black overflow-hidden rounded-2xl" style="aspect-ratio: 16/9;">
+                    <div id="mainVideoBody" class="absolute inset-0 flex items-center justify-center text-slate-500">
+                        <iframe src="${src.embed.replace(/"/g, '&quot;')}"
+                                style="position:absolute; left:0; width:100%; top:-${off}px; height:calc(100% + ${off}px); border:0;"
+                                allow="autoplay; encrypted-media; fullscreen; picture-in-picture"
+                                allowfullscreen
+                                referrerpolicy="strict-origin-when-cross-origin">
+                        </iframe>
+                    </div>
+                    <button onclick="toggleVideoFullscreen()"
+                        class="absolute bottom-3 right-3 z-20 bg-black/70 hover:bg-black text-white rounded-full w-11 h-11 flex items-center justify-center shadow-lg backdrop-blur-sm transition"
+                        title="Plein écran">
+                        <i class="fas fa-expand text-base"></i>
+                    </button>
+                </div>
+                <div class="flex flex-col sm:flex-row items-center gap-2 mt-3 w-full">
+                    <p class="text-xs font-bold text-slate-700 flex-1 truncate"><i class="fas fa-play-circle text-brand-500 mr-1"></i> ${sanitizeInput(titre)}</p>
+                    <div class="flex gap-2">
+                        <button onclick="openVideoExternal()" class="px-3 py-2 bg-brand-600 text-white rounded-lg text-xs font-bold hover:bg-brand-700 transition flex items-center gap-1.5 shadow-sm">
+                            <i class="fab fa-google-drive text-sm"></i> Ouvrir dans Drive
+                        </button>
+                        <button onclick="closeMainVideo()" class="px-3 py-2 bg-slate-200 text-slate-700 rounded-lg text-xs font-bold hover:bg-slate-300 transition flex items-center gap-1.5">
+                            <i class="fas fa-times text-sm"></i> Fermer
+                        </button>
+                    </div>
+                </div>`;
+
+            // Bandeau d'aide spécifique mobile / WebView in-app
+            if (mobile || inApp) {
+                let warningText = "";
+                if (inApp) {
+                    warningText = "Vous êtes dans un navigateur intégré (WhatsApp/Facebook). Pour une meilleure lecture, ouvrez le site dans Chrome ou Safari.";
+                } else if (isIOS()) {
+                    warningText = "Sur iPhone, le lecteur Drive peut ne pas démarrer directement. Utilisez « Ouvrir dans Drive » si besoin.";
+                } else {
+                    warningText = "Si la vidéo ne démarre pas, appuyez sur « Ouvrir dans Drive » ou sur le bouton plein écran.";
+                }
+                html += `<div class="video-help-banner w-full mt-2 bg-amber-50 border border-amber-200 rounded-xl p-3 text-[11px] text-amber-800 font-medium flex items-start gap-2">
+                    <i class="fas fa-info-circle text-amber-600 mt-0.5 shrink-0"></i>
+                    <span>${warningText}</span>
+                </div>`;
+            }
+
+            section.innerHTML = html;
+            section.classList.remove('hidden');
+            renderMath(section);
+            fitMainVideo();
+            section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        // Plein écran natif sur le cadre (fonctionne bien sur Android, et iOS 15+)
+        function toggleVideoFullscreen() {
+            const frame = document.getElementById('mainVideoFrame');
+            if (!frame) return;
+            const fsElement = document.fullscreenElement || document.webkitFullscreenElement;
+            if (!fsElement) {
+                const req = frame.requestFullscreen || frame.webkitRequestFullscreen || frame.msRequestFullscreen;
+                if (req) {
+                    req.call(frame).catch(() => {
+                        // Fallback iOS : ouvrir dans Drive
+                        if (isIOS() && currentVideoExternal) {
+                            showToast("Plein écran non supporté, ouverture dans Drive...", "info");
+                            openVideoExternal();
+                        }
+                    });
+                } else if (isIOS() && currentVideoExternal) {
+                    showToast("Plein écran non supporté, ouverture dans Drive...", "info");
+                    openVideoExternal();
+                }
+            } else {
+                const exit = document.exitFullscreen || document.webkitExitFullscreen || document.msExitFullscreen;
+                if (exit) exit.call(document);
+            }
+        }
+
+        // Ajuste le cadre 16/9 : pleine largeur, hauteur limitée à la zone visible
+        function fitMainVideo() {
+            const section = document.getElementById('mainVideoSection');
+            if (!section || section.classList.contains('hidden')) return;
+            const frame = document.getElementById('mainVideoFrame');
+            if (!frame) return;
+            const nav = document.getElementById('navbar');
+            const navH = nav ? nav.offsetHeight : 0;
+            const vw = document.documentElement.clientWidth;
+            const vh = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+
+            // Le lecteur sort du conteneur et occupe toute la largeur de l'écran
+            const parent = section.parentElement;
+            const cs = getComputedStyle(parent);
+            const parentLeft = parent.getBoundingClientRect().left + parseFloat(cs.paddingLeft);
+            section.style.width = vw + 'px';
+            section.style.marginLeft = (-parentLeft) + 'px';
+
+            // 16/9 strict : on prend la plus petite dimension entre "largeur écran" et "hauteur disponible * 16/9"
+            // Pas de plancher 240px qui débordait sur mobile
+            const availH = Math.max(vh - navH - 16, 180);
+            const wByHeight = availH * 16 / 9;
+            const w = Math.min(vw, wByHeight);
+            frame.style.width = w + 'px';
+            frame.style.height = (w * 9 / 16) + 'px';
+            section.style.scrollMarginTop = (navH + 8) + 'px';
+        }
+
+        window.addEventListener('load', fitMainVideo);
+        window.addEventListener('resize', fitMainVideo);
+        window.addEventListener('orientationchange', () => setTimeout(fitMainVideo, 250));
+        if (window.visualViewport) window.visualViewport.addEventListener('resize', fitMainVideo);
+
+        function closeMainVideo() {
+            const section = document.getElementById('mainVideoSection');
+            section.classList.add('hidden');
+            section.innerHTML = ''; // Arrête la lecture et libère le DOM
+            currentVideoExternal = '';
+        }
+
+        function openVideoExternal() {
+            if (currentVideoExternal) window.open(currentVideoExternal, '_blank', 'noopener');
         }
 
         function checkPremiumLock(isPremium, matiere) {
+            if (currentUser && currentUser.isAdmin) return false;
+            
             if (isPremium) {
                 if (!currentUser) { 
                     showAuthModal('login'); 
@@ -801,21 +1263,43 @@
             const banner = document.getElementById('welcomeBanner');
             const filterCategoryBox = document.getElementById('filterCategoryBox');
             const searchCardTitle = document.getElementById('searchCardTitle');
+            const adminBtn = document.getElementById('adminPanelBtn');
 
             if (currentUser) {
                 authBtns.classList.add('hidden'); 
                 userDisplay.classList.remove('hidden'); 
                 banner.classList.remove('hidden');
                 
-                // Masquer la section "Filtrer par niveau" pour l'élève connecté (ses cours s'affichent automatiquement selon sa classe)
+                if (currentUser.isAdmin) {
+                    adminBtn.classList.remove('hidden');
+                    if (filterCategoryBox) filterCategoryBox.classList.remove('hidden');
+                    if (searchCardTitle) searchCardTitle.innerText = "Mode Administration";
+                    
+                    document.getElementById('userNameNav').innerText = "Admin";
+                    document.getElementById('userClassNav').innerText = "Administrateur";
+                    document.getElementById('userInitialNav').innerText = "A";
+                    document.getElementById('welcomeUserText').innerText = "Espace Administrateur";
+                    document.getElementById('welcomeRoleText').innerText = "GESTION GLOBALE";
+                    document.getElementById('userInitial').innerText = "A";
+                    document.getElementById('motivationQuote').innerText = "Bienvenue dans votre panneau de gestion.";
+                    
+                    const subStatusBox = document.getElementById('subscriptionStatus');
+                    subStatusBox.className = "flex items-center gap-1 px-3 py-1.5 rounded-full text-[11px] font-black bg-purple-100 text-purple-700 border border-purple-200";
+                    subStatusBox.innerHTML = `<i class="fas fa-crown text-purple-600"></i><span>ADMIN</span>`;
+                    return;
+                } else {
+                    adminBtn.classList.add('hidden');
+                }
+
                 if (filterCategoryBox) filterCategoryBox.classList.add('hidden');
                 if (searchCardTitle) searchCardTitle.innerText = `Mes cours (${currentUser.classe})`;
                 
                 const initials = currentUser.nom ? currentUser.nom.charAt(0).toUpperCase() : 'U';
-                document.getElementById('userNameNav').innerText = currentUser.nom.split(' ')[0];
-                document.getElementById('userClassNav').innerText = currentUser.classe;
+                document.getElementById('userNameNav').innerText = sanitizeInput(currentUser.nom.split(' ')[0]);
+                document.getElementById('userClassNav').innerText = sanitizeInput(currentUser.classe);
                 document.getElementById('userInitialNav').innerText = initials;
-                document.getElementById('welcomeUserText').innerText = `${currentUser.nom}`;
+                document.getElementById('welcomeUserText').innerText = `${sanitizeInput(currentUser.nom)}`;
+                document.getElementById('welcomeRoleText').innerText = "ESPACE ÉLÈVE";
                 document.getElementById('userInitial').innerText = initials;
                 document.getElementById('motivationQuote').innerText = quotes[Math.floor(Math.random() * quotes.length)];
 
@@ -827,29 +1311,18 @@
                     if (currentUser.date_expiration) {
                         const todayStr = new Date().toISOString().split('T')[0];
                         const expStr = currentUser.date_expiration.split('T')[0];
-                        
                         const todayDate = new Date(todayStr);
                         const expDate = new Date(expStr);
-                        const msPerDay = 1000 * 60 * 60 * 24;
-                        daysDiff = Math.round((expDate - todayDate) / msPerDay);
+                        daysDiff = Math.round((expDate - todayDate) / (1000 * 60 * 60 * 24));
                     }
 
                     if (daysDiff >= 0 && currentUser.actif) {
-                        let daysText = '';
-                        if (daysDiff === 0) {
-                            daysText = "Dernier jour";
-                        } else if (daysDiff === 1) {
-                            daysText = "1 jour restant";
-                        } else {
-                            daysText = `${daysDiff} jours restants`;
-                        }
-                        
+                        let daysText = daysDiff === 0 ? "Dernier jour" : daysDiff === 1 ? "1 jour restant" : `${daysDiff} jours restants`;
                         if (subStatusBox) {
-                            subStatusBox.className = "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] md:text-[11px] font-extrabold bg-emerald-50 text-emerald-700 border border-emerald-200 shadow-sm transition-all hover:bg-emerald-100 cursor-pointer";
+                            subStatusBox.className = "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] md:text-[11px] font-extrabold bg-emerald-50 text-emerald-700 border border-emerald-200 cursor-pointer";
                             subStatusBox.innerHTML = `<i class="fas fa-clock text-emerald-500 animate-pulse"></i><span>${daysText}</span>`;
                             subStatusBox.onclick = () => showPremiumOptionsModal();
                         }
-                        
                         if (welcomeBadge) {
                             welcomeBadge.classList.remove('hidden');
                             welcomeBadge.className = "text-[10px] font-black px-2.5 py-0.5 rounded-full border bg-emerald-500/20 text-emerald-300 border-emerald-500/30 flex items-center gap-1";
@@ -861,7 +1334,6 @@
                             subStatusBox.innerHTML = `<i class="fas fa-exclamation-triangle text-red-500"></i><span>Abonnement expiré</span>`;
                             subStatusBox.onclick = () => showPremiumOptionsModal();
                         }
-                        
                         if (welcomeBadge) {
                             welcomeBadge.classList.remove('hidden');
                             welcomeBadge.className = "text-[10px] font-black px-2.5 py-0.5 rounded-full border bg-red-500/20 text-red-300 border-red-500/30 flex items-center gap-1";
@@ -885,7 +1357,6 @@
                 userDisplay.classList.add('hidden'); 
                 banner.classList.add('hidden');
                 
-                // Réafficher le filtre par niveau si l'utilisateur n'est pas connecté (visiteur)
                 if (filterCategoryBox) filterCategoryBox.classList.remove('hidden');
                 if (searchCardTitle) searchCardTitle.innerText = "Trouve ta leçon";
             }
@@ -1001,7 +1472,7 @@
         }
 
         function sendWhatsAppSubscription(packType, subjectsArray) {
-            let nomClient = currentUser ? `*${currentUser.nom}* (Classe: ${currentUser.classe}, ID: ${currentUser.id})` : "un élève";
+            let nomClient = currentUser ? `*${sanitizeInput(currentUser.nom)}* (Classe: ${sanitizeInput(currentUser.classe)}, ID: ${sanitizeInput(currentUser.id)})` : "un élève";
             let packName = packType === 'EXCELLENCE' ? 'PACK EXCELLENCE (3 Matières)' : packType === 'DUO' ? 'PACK DUO (2 Matières)' : 'PACK SOLO (1 Matière)';
             let message = `Bonjour Excellence Académie ! 👋\nC'est ${nomClient}.\n\nJe souhaite souscrire au *${packName}* 🚀\nMatières : *${subjectsArray.join(' et ')}*\n\nQuelles sont les instructions pour effectuer le paiement ?`;
             window.open(`https://wa.me/${adminPhone}?text=${encodeURIComponent(message)}`, '_blank');
@@ -1034,14 +1505,12 @@
             
             try {
                 if (currentAuthMode === 'signup') {
-                    const nom = document.getElementById('regFullName').value.trim(); 
-                    const classe = document.getElementById('regClasse').value;
+                    const nom = sanitizeInput(document.getElementById('regFullName').value); 
+                    const classe = sanitizeInput(document.getElementById('regClasse').value);
                     if (!nom || !classe) throw new Error("Veuillez remplir tous les champs.");
                     
                     const motsNom = nom.split(/\s+/);
-                    if (motsNom.length < 2) {
-                        throw new Error("Veuillez taper votre prénom ET votre nom complet (ex: Moussa Diop).");
-                    }
+                    if (motsNom.length < 2) throw new Error("Veuillez taper votre prénom ET votre nom complet (ex: Moussa Diop).");
                     
                     const id = "E" + Math.random().toString(36).substring(2, 5).toUpperCase();
                     const { error } = await sbClient.from('eleves').insert([{ id, nom, classe, actif: false, abonnements: ['SVT'] }]);
@@ -1054,15 +1523,35 @@
                         closeAuthModal(); 
                     }, 1200);
                 } else {
-                    const id = document.getElementById('loginID').value.toUpperCase().trim();
-                    if (id.length < 4) throw new Error("Saisis ton code ID à 4 caractères.");
-                    
+                    const inputVal = sanitizeInput(document.getElementById('loginID').value);
+                    if (!inputVal) throw new Error("Saisis ton code d'accès.");
+
+                    const codeAdminExact = dbParameters['code_admin'] || 'ADMIN2026';
+                    if (inputVal === codeAdminExact || inputVal.toUpperCase() === codeAdminExact.toUpperCase()) {
+                        currentUser = {
+                            id: 'ADMIN',
+                            nom: 'Administrateur',
+                            classe: 'Admin',
+                            actif: true,
+                            abonnements: ['SVT', 'MATHS', 'PC'],
+                            isAdmin: true,
+                            login_time: Date.now()
+                        };
+                        localStorage.setItem('svt_user_session', JSON.stringify(currentUser));
+                        showToast("Connexion réussie !", "success");
+                        updateUIForUser();
+                        closeAuthModal();
+                        render();
+                        return;
+                    }
+
+                    const id = inputVal.toUpperCase();
                     const { data, error } = await sbClient.from('eleves').select('id, nom, classe, actif, abonnements, date_expiration, device_id').eq('id', id).single();
-                    if (error || !data) throw new Error("Code ID introuvable.");
+                    if (error || !data) throw new Error("Code d'accès introuvable.");
 
                     const currentDeviceId = getDeviceID();
                     if (data.device_id && data.device_id !== currentDeviceId) {
-                        throw new Error("Ce code ID est déjà lié à un autre téléphone ou navigateur.");
+                        throw new Error("Ce code d'accès est déjà lié à un autre appareil.");
                     } else if (!data.device_id) {
                         await sbClient.from('eleves').update({ device_id: currentDeviceId }).eq('id', id);
                     }
@@ -1072,7 +1561,7 @@
                     currentUser = data; 
                     localStorage.setItem('svt_user_session', JSON.stringify(data));
                     
-                    showToast(`Bienvenue, ${data.nom.split(' ')[0]} !`, "success"); 
+                    showToast(`Bienvenue, ${sanitizeInput(data.nom.split(' ')[0])} !`, "success"); 
                     updateUIForUser(); 
                     closeAuthModal(); 
                     render();
@@ -1088,6 +1577,7 @@
         function logout() { 
             localStorage.removeItem('svt_user_session'); 
             currentUser = null; 
+            closeMainVideo();
             updateUIForUser(); 
             showToast("Déconnexion réussie.", "info"); 
             render(); 
@@ -1104,6 +1594,7 @@
 
         function isUserExpired() {
             if (!currentUser) return false;
+            if (currentUser.isAdmin) return false;
             if (currentUser.actif !== true) return true;
             if (currentUser.date_expiration) {
                 const todayStr = new Date().toISOString().split('T')[0];
@@ -1127,7 +1618,7 @@
                 return;
             }
 
-            if (isPremium) {
+            if (isPremium && !currentUser.isAdmin) {
                 const userAboArray = currentUser.abonnements || [];
                 if (!userAboArray.includes(matiere)) {
                     intendedPremiumMatiere = matiere;
@@ -1159,7 +1650,7 @@
                 return;
             }
 
-            if (isPremium) {
+            if (isPremium && !currentUser.isAdmin) {
                 const userAboArray = currentUser.abonnements || [];
                 if (!userAboArray.includes(matiere)) {
                     intendedPremiumMatiere = matiere;
@@ -1173,7 +1664,9 @@
             quizUserAnswers = {}; 
             currentQuizData = null;
             
-            document.getElementById('quizTitle').innerText = "Quiz : " + courseTitle; 
+            const quizTitleEl = document.getElementById('quizTitle');
+            quizTitleEl.textContent = "Quiz : " + courseTitle;
+            renderMath(quizTitleEl);
             document.getElementById('quizModal').classList.remove('hidden');
             document.getElementById('quizContent').innerHTML = `<div class="text-center py-10"><i class="fas fa-circle-notch animate-spin text-2xl text-quiz-500"></i><p class="mt-3 text-slate-400 font-bold text-xs">Chargement des questions du quiz...</p></div>`;
             document.getElementById('quizScoreBox').classList.add('hidden'); 
@@ -1214,16 +1707,19 @@
                             <div class="w-4 h-4 rounded-full border-2 border-slate-300 flex items-center justify-center peer-checked:border-quiz-500 peer-checked:bg-quiz-500">
                                 <div class="w-1.5 h-1.5 bg-white rounded-full opacity-0 peer-checked:opacity-100"></div>
                             </div>
-                            <span>${opt.option_texte}</span>
+                            <span>${sanitizeInput(opt.option_texte)}</span>
                         </div>
                     </label>`;
             });
 
-            document.getElementById('quizContent').innerHTML = `
+            const contentDiv = document.getElementById('quizContent');
+            contentDiv.innerHTML = `
                 <div class="fade-in">
-                    <p class="font-bold text-slate-800 mb-5 text-sm sm:text-base leading-snug"><span class="text-quiz-600 mr-1.5 font-black">Q${index + 1}.</span> ${q.question_texte}</p>
+                    <p class="font-bold text-slate-800 mb-5 text-sm sm:text-base leading-snug"><span class="text-quiz-600 mr-1.5 font-black">Q${index + 1}.</span> ${sanitizeInput(q.question_texte)}</p>
                     <div class="space-y-3">${optionsHtml}</div>
                 </div>`;
+            
+            renderMath(contentDiv);
             
             document.getElementById('btnPrev').classList.toggle('hidden', index === 0); 
             document.getElementById('btnNext').classList.toggle('hidden', index === total - 1); 
@@ -1260,7 +1756,7 @@
                         classes = "p-2.5 rounded-lg border border-emerald-200 bg-emerald-50 text-emerald-800 font-bold opacity-80 text-xs"; 
                         icon = '<span class="text-[9px] bg-emerald-200 text-emerald-800 px-2 py-0.5 rounded ml-auto">Réponse correcte</span>'; 
                     }
-                    optionsDisplay += `<div class="${classes}">${opt.option_texte} ${icon}</div>`;
+                    optionsDisplay += `<div class="${classes}">${sanitizeInput(opt.option_texte)} ${icon}</div>`;
                 });
 
                 resultHtml += `
@@ -1269,22 +1765,26 @@
                             <div class="w-6 h-6 rounded-full flex items-center justify-center shrink-0 text-xs ${isCorrect ? 'bg-emerald-100 text-emerald-600' : 'bg-red-100 text-red-600'}">
                                 <i class="fas ${isCorrect ? 'fa-check' : 'fa-times'}"></i>
                             </div>
-                            <p class="font-bold text-slate-800 text-xs sm:text-sm pt-0.5">Q${idx + 1}. ${q.question_texte}</p>
+                            <p class="font-bold text-slate-800 text-xs sm:text-sm pt-0.5">Q${idx + 1}. ${sanitizeInput(q.question_texte)}</p>
                         </div>
                         <div class="space-y-2 pl-8 mb-3">${optionsDisplay}</div>
                         <div class="ml-8 p-3 bg-blue-50 text-blue-900 text-xs rounded-xl border border-blue-100">
                             <p class="font-bold mb-0.5"><i class="fas fa-lightbulb text-amber-500 mr-1"></i> Explication :</p>
-                            ${q.explication || "Aucune explication spécifique renseignée."}
+                            ${sanitizeInput(q.explication || "Aucune explication spécifique renseignée.")}
                         </div>
                     </div>`;
             });
 
-            document.getElementById('quizContent').innerHTML = resultHtml + '</div>'; 
+            const contentDiv = document.getElementById('quizContent');
+            contentDiv.innerHTML = resultHtml + '</div>'; 
+            
+            renderMath(contentDiv);
+
             document.getElementById('quizScoreBox').classList.remove('hidden'); 
             document.getElementById('scoreValue').innerText = `${score}/${total}`;
             ['btnPrev','btnNext','btnSubmit'].forEach(id => document.getElementById(id).classList.add('hidden')); 
             document.getElementById('btnRetry').classList.remove('hidden'); 
-            document.getElementById('quizContent').scrollTop = 0;
+            contentDiv.scrollTop = 0;
             
             showToast(score === total ? "Bravo ! Résultat parfait ! 🎉" : score >= total / 2 ? "Bon travail !" : "Pense à relire la leçon.", score >= total/2 ? "success" : "warning");
         }
@@ -1322,6 +1822,7 @@
         }
 
         function resetFiltersAndReload() {
+            closeMainVideo();
             resetFilters();
             switchMatiere('SVT');
             switchView('cours');
@@ -1350,7 +1851,7 @@
             
             const toast = document.createElement('div'); 
             toast.className = `transform translate-x-full transition-all duration-300 ease-out flex items-center gap-3 px-4 py-3 rounded-xl shadow-xl ${bg} border-l-4 ${border} pointer-events-auto`;
-            toast.innerHTML = `<i class="fas ${icon} text-base shrink-0"></i><p class="text-xs font-bold text-slate-700 leading-snug">${message}</p>`;
+            toast.innerHTML = `<i class="fas ${icon} text-base shrink-0"></i><p class="text-xs font-bold text-slate-700 leading-snug">${sanitizeInput(message)}</p>`;
             
             container.appendChild(toast); 
             requestAnimationFrame(() => toast.classList.remove('translate-x-full')); 
@@ -1369,8 +1870,7 @@
             if (view === 'cours') { 
                 btnCours.className = "relative z-10 px-5 sm:px-6 py-2 rounded-xl text-xs sm:text-sm font-black transition-all duration-300 bg-slate-900 text-white shadow-md"; 
                 btnAnnales.className = "relative z-10 px-5 sm:px-6 py-2 rounded-xl text-xs sm:text-sm font-bold text-slate-500 transition-all duration-300 hover:text-amber-600 hover:bg-amber-50"; 
-                // Ne réaffiche le filtre de niveau que si l'élève n'est pas connecté
-                if (filterBox && !currentUser) filterBox.classList.remove('hidden');
+                if (filterBox && (!currentUser || currentUser.isAdmin)) filterBox.classList.remove('hidden');
             } else { 
                 btnCours.className = "relative z-10 px-5 sm:px-6 py-2 rounded-xl text-xs sm:text-sm font-bold text-slate-500 transition-all duration-300 hover:text-brand-600 hover:bg-slate-50"; 
                 btnAnnales.className = "relative z-10 px-5 sm:px-6 py-2 rounded-xl text-xs sm:text-sm font-black transition-all duration-300 bg-amber-500 text-white shadow-lg shadow-amber-200"; 
@@ -1390,7 +1890,290 @@
         }
 
         function contactAdmin() { 
-            window.open(`https://wa.me/${adminName}?text=${encodeURIComponent("Bonjour, j'ai besoin d'assistance pour mon compte Excellence Académie.")}`, '_blank'); 
+            window.open(`https://wa.me/${adminPhone}?text=${encodeURIComponent("Bonjour, j'ai besoin d'assistance pour mon compte Excellence Académie.")}`, '_blank'); 
+        }
+
+        async function openAdminModal() {
+            if (!currentUser || !currentUser.isAdmin) return;
+            document.getElementById('adminModal').classList.remove('hidden');
+            await loadAdminEleves();
+            renderAdminCours();
+            renderAdminAnnales();
+            loadAdminParamsUI();
+        }
+
+        function closeAdminModal() {
+            document.getElementById('adminModal').classList.add('hidden');
+        }
+
+        function switchAdminTab(tab) {
+            const tabs = ['Eleves', 'Cours', 'Annales', 'Params'];
+            tabs.forEach(t => {
+                const btn = document.getElementById(`tabAdmin${t}`);
+                const sec = document.getElementById(`adminSection${t}`);
+                if (t.toLowerCase() === tab.toLowerCase()) {
+                    btn.className = "px-4 py-2 rounded-xl text-xs font-bold bg-purple-600 text-white shadow-sm";
+                    sec.classList.remove('hidden');
+                } else {
+                    btn.className = "px-4 py-2 rounded-xl text-xs font-bold bg-slate-100 text-slate-600 hover:bg-slate-200";
+                    sec.classList.add('hidden');
+                }
+            });
+        }
+
+        async function loadAdminEleves() {
+            const { data, error } = await sbClient.from('eleves').select('*').order('date_inscription', { ascending: false });
+            if (!error && data) {
+                allEleves = data;
+                renderAdminEleves();
+            }
+        }
+
+        function renderAdminEleves() {
+            const tbody = document.getElementById('adminElevesTable');
+            const search = sanitizeInput(document.getElementById('searchAdminEleve').value).toLowerCase();
+            tbody.innerHTML = '';
+
+            const filtered = allEleves.filter(e => (e.nom || '').toLowerCase().includes(search) || (e.id || '').toLowerCase().includes(search));
+            document.getElementById('elevesCount').innerText = `${filtered.length} élève(s)`;
+
+            filtered.forEach(eleve => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50 transition";
+                const abos = eleve.abonnements || [];
+                const isActif = eleve.actif === true;
+                const expDate = eleve.date_expiration ? eleve.date_expiration.split('T')[0] : 'Non définie';
+
+                tr.innerHTML = `
+                    <td class="p-3 font-black text-purple-700">${sanitizeInput(eleve.id)}</td>
+                    <td class="p-3">
+                        <div class="font-bold text-slate-800">${sanitizeInput(eleve.nom)}</div>
+                        <div class="text-[10px] text-slate-400 font-bold uppercase">${sanitizeInput(eleve.classe)}</div>
+                    </td>
+                    <td class="p-3">
+                        <div class="flex gap-1">
+                            <button onclick="toggleAdminAbo('${eleve.id}', 'SVT')" class="px-2 py-0.5 rounded text-[10px] font-bold ${abos.includes('SVT') ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' : 'bg-slate-100 text-slate-400'}">SVT</button>
+                            <button onclick="toggleAdminAbo('${eleve.id}', 'MATHS')" class="px-2 py-0.5 rounded text-[10px] font-bold ${abos.includes('MATHS') ? 'bg-red-100 text-red-800 border border-red-300' : 'bg-slate-100 text-slate-400'}">MATHS</button>
+                            <button onclick="toggleAdminAbo('${eleve.id}', 'PC')" class="px-2 py-0.5 rounded text-[10px] font-bold ${abos.includes('PC') ? 'bg-purple-100 text-purple-800 border border-purple-300' : 'bg-slate-100 text-slate-400'}">PC</button>
+                        </div>
+                    </td>
+                    <td class="p-3 font-medium text-slate-600">${expDate}</td>
+                    <td class="p-3">
+                        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${isActif ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'}">
+                            ${isActif ? 'Actif' : 'Inactif'}
+                        </span>
+                    </td>
+                    <td class="p-3 text-right">
+                        <div class="flex items-center justify-end gap-1.5">
+                            <button onclick="toggleAdminEleveActif('${eleve.id}', ${!isActif})" class="px-2.5 py-1 rounded-lg text-[10px] font-bold ${isActif ? 'bg-amber-100 text-amber-800 hover:bg-amber-200' : 'bg-emerald-600 text-white hover:bg-emerald-700'}" title="Changer le statut">
+                                ${isActif ? 'Désactiver' : 'Activer'}
+                            </button>
+                            <button onclick="extendAdminEleveDays('${eleve.id}', 30)" class="px-2 py-1 bg-slate-100 text-slate-700 rounded-lg text-[10px] font-bold hover:bg-slate-200">+30j</button>
+                            <button onclick="extendAdminEleveDays('${eleve.id}', 90)" class="px-2 py-1 bg-slate-100 text-slate-700 rounded-lg text-[10px] font-bold hover:bg-slate-200">+90j</button>
+                            <button onclick="resetAdminDevice('${eleve.id}')" class="p-1.5 bg-blue-50 text-blue-600 rounded-lg text-[10px] hover:bg-blue-100" title="Réinitialiser l'appareil lié"><i class="fas fa-mobile-alt"></i></button>
+                            <button onclick="deleteAdminEleve('${eleve.id}')" class="p-1.5 bg-red-50 text-red-600 rounded-lg text-[10px] hover:bg-red-100" title="Supprimer l'élève"><i class="fas fa-trash"></i></button>
+                        </div>
+                    </td>`;
+                tbody.appendChild(tr);
+            });
+        }
+
+        async function toggleAdminEleveActif(id, newStatus) {
+            let updatePayload = { actif: newStatus };
+            if (newStatus) {
+                const today = new Date();
+                today.setDate(today.getDate() + 30);
+                updatePayload.date_activation = new Date().toISOString();
+                updatePayload.date_expiration = today.toISOString();
+            }
+            const { error } = await sbClient.from('eleves').update(updatePayload).eq('id', id);
+            if (!error) {
+                showToast("Statut de l'élève mis à jour", "success");
+                await loadAdminEleves();
+            }
+        }
+
+        async function toggleAdminAbo(id, matiere) {
+            const eleve = allEleves.find(e => e.id === id);
+            if (!eleve) return;
+            let abos = eleve.abonnements || [];
+            if (abos.includes(matiere)) {
+                abos = abos.filter(m => m !== matiere);
+            } else {
+                abos.push(matiere);
+            }
+            const { error } = await sbClient.from('eleves').update({ abonnements: abos }).eq('id', id);
+            if (!error) {
+                showToast("Abonnements mis à jour", "success");
+                await loadAdminEleves();
+            }
+        }
+
+        async function extendAdminEleveDays(id, days) {
+            const eleve = allEleves.find(e => e.id === id);
+            let baseDate = new Date();
+            if (eleve && eleve.date_expiration) {
+                const currentExp = new Date(eleve.date_expiration);
+                if (currentExp > baseDate) baseDate = currentExp;
+            }
+            baseDate.setDate(baseDate.getDate() + days);
+            const { error } = await sbClient.from('eleves').update({ actif: true, date_expiration: baseDate.toISOString() }).eq('id', id);
+            if (!error) {
+                showToast(`Accès prolongé de ${days} jours`, "success");
+                await loadAdminEleves();
+            }
+        }
+
+        async function resetAdminDevice(id) {
+            const { error } = await sbClient.from('eleves').update({ device_id: null }).eq('id', id);
+            if (!error) {
+                showToast("Appareil délié avec succès", "success");
+                await loadAdminEleves();
+            }
+        }
+
+        async function deleteAdminEleve(id) {
+            if (!confirm(`Voulez-vous vraiment supprimer l'élève ${id} ?`)) return;
+            const { error } = await sbClient.from('eleves').delete().eq('id', id);
+            if (!error) {
+                showToast("Élève supprimé", "info");
+                await loadAdminEleves();
+            }
+        }
+
+        function renderAdminCours() {
+            const tbody = document.getElementById('adminCoursTable');
+            tbody.innerHTML = '';
+            allCourses.forEach(c => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50 transition";
+                tr.innerHTML = `
+                    <td class="p-3 font-bold text-slate-400">#${c.id}</td>
+                    <td class="p-3">
+                        <div class="font-extrabold text-slate-800">${sanitizeInput(c.titre)}</div>
+                        <div class="text-[10px] text-brand-600 font-bold">${sanitizeInput(c.matiere)}</div>
+                    </td>
+                    <td class="p-3 font-semibold text-slate-600">${sanitizeInput(c.classe)}</td>
+                    <td class="p-3">
+                        <span class="px-2 py-0.5 rounded text-[10px] font-bold ${c.type_acces === 'premium' ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800'}">
+                            ${sanitizeInput(c.type_acces)}
+                        </span>
+                    </td>
+                    <td class="p-3 text-right">
+                        <button onclick="deleteAdminCours(${c.id})" class="p-1.5 bg-red-50 text-red-600 rounded-lg text-xs hover:bg-red-100" title="Supprimer"><i class="fas fa-trash"></i></button>
+                    </td>`;
+                tbody.appendChild(tr);
+            });
+        }
+
+        async function handleCreateCours(e) {
+            e.preventDefault();
+            const titre = sanitizeInput(document.getElementById('newCoursTitre').value);
+            const matiere = sanitizeInput(document.getElementById('newCoursMatiere').value);
+            const classe = sanitizeInput(document.getElementById('newCoursClasse').value);
+            const type_acces = sanitizeInput(document.getElementById('newCoursAcces').value);
+            const url_vid = sanitizeInput(document.getElementById('newCoursVid').value) || null;
+            const url_exos = sanitizeInput(document.getElementById('newCoursExos').value) || null;
+            const url_pdf = sanitizeInput(document.getElementById('newCoursPdf').value) || null;
+
+            const { data, error } = await sbClient.from('cours').insert([{ titre, matiere, classe, type_acces, url_vid, url_exos, url_pdf }]).select();
+            if (error) {
+                showToast(error.message, "error");
+            } else {
+                showToast("Nouveau cours ajouté avec succès !", "success");
+                sessionStorage.removeItem('sb_cache_cours');
+                e.target.reset();
+                await init();
+                renderAdminCours();
+            }
+        }
+
+        async function deleteAdminCours(id) {
+            if (!confirm("Supprimer ce cours ?")) return;
+            const { error } = await sbClient.from('cours').delete().eq('id', id);
+            if (!error) {
+                showToast("Cours supprimé", "info");
+                sessionStorage.removeItem('sb_cache_cours');
+                await init();
+                renderAdminCours();
+            }
+        }
+
+        function renderAdminAnnales() {
+            const tbody = document.getElementById('adminAnnalesTable');
+            tbody.innerHTML = '';
+            allAnnales.forEach(a => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50 transition";
+                tr.innerHTML = `
+                    <td class="p-3 font-bold text-slate-400">#${a.id}</td>
+                    <td class="p-3">
+                        <div class="font-extrabold text-slate-800">${sanitizeInput(a.titre)}</div>
+                        <div class="text-[10px] text-amber-600 font-bold">${sanitizeInput(a.matiere)}</div>
+                    </td>
+                    <td class="p-3 font-bold text-slate-700">${Number(a.prix)} FCFA</td>
+                    <td class="p-3 text-right">
+                        <button onclick="deleteAdminAnnale(${a.id})" class="p-1.5 bg-red-50 text-red-600 rounded-lg text-xs hover:bg-red-100" title="Supprimer"><i class="fas fa-trash"></i></button>
+                    </td>`;
+                tbody.appendChild(tr);
+            });
+        }
+
+        async function handleCreateAnnale(e) {
+            e.preventDefault();
+            const titre = sanitizeInput(document.getElementById('newAnnaleTitre').value);
+            const matiere = sanitizeInput(document.getElementById('newAnnaleMatiere').value);
+            const prix = Number(document.getElementById('newAnnalePrix').value);
+            const url_pdf = sanitizeInput(document.getElementById('newAnnalePdf').value);
+
+            const { error } = await sbClient.from('annales').insert([{ titre, matiere, prix, url_pdf }]);
+            if (error) {
+                showToast(error.message, "error");
+            } else {
+                showToast("Nouvelle annale ajoutée", "success");
+                sessionStorage.removeItem('sb_cache_annales');
+                e.target.reset();
+                await init();
+                renderAdminAnnales();
+            }
+        }
+
+        async function deleteAdminAnnale(id) {
+            if (!confirm("Supprimer cette annale ?")) return;
+            const { error } = await sbClient.from('annales').delete().eq('id', id);
+            if (!error) {
+                showToast("Annale supprimée", "info");
+                sessionStorage.removeItem('sb_cache_annales');
+                await init();
+                renderAdminAnnale();
+            }
+        }
+
+        function loadAdminParamsUI() {
+            document.getElementById('paramCodeAdmin').value = dbParameters['code_admin'] || '';
+            document.getElementById('paramWhatsapp').value = dbParameters['whatsapp_phone'] || '';
+            document.getElementById('paramPrixSolo').value = dbParameters['prix_solo'] || '2000';
+            document.getElementById('paramPrixDuo').value = dbParameters['prix_duo'] || '3500';
+            document.getElementById('paramPrixExcellence').value = dbParameters['prix_excellence'] || '5000';
+        }
+
+        async function handleSaveParams(e) {
+            e.preventDefault();
+            const updates = [
+                { cle: 'code_admin', valeur: sanitizeInput(document.getElementById('paramCodeAdmin').value) },
+                { cle: 'whatsapp_phone', valeur: sanitizeInput(document.getElementById('paramWhatsapp').value) },
+                { cle: 'prix_solo', valeur: sanitizeInput(document.getElementById('paramPrixSolo').value) },
+                { cle: 'prix_duo', valeur: sanitizeInput(document.getElementById('paramPrixDuo').value) },
+                { cle: 'prix_excellence', valeur: sanitizeInput(document.getElementById('paramPrixExcellence').value) }
+            ];
+
+            const { error } = await sbClient.from('parametres').upsert(updates, { onConflict: 'cle' });
+            if (error) {
+                showToast(error.message, "error");
+            } else {
+                showToast("Paramètres mis à jour avec succès !", "success");
+                await loadParametersFromDB();
+            }
         }
     </script>
 </body>
