@@ -76,6 +76,7 @@
         .subject-tab.active-svt { background-color: #10b981; color: white; border-color: #10b981; box-shadow: 0 4px 14px 0 rgba(16, 185, 129, 0.35); }
         .subject-tab.active-maths { background-color: #dc2626; color: white; border-color: #dc2626; box-shadow: 0 4px 14px 0 rgba(220, 38, 38, 0.35); }
         .subject-tab.active-pc { background-color: #7c3aed; color: white; border-color: #7c3aed; box-shadow: 0 4px 14px 0 rgba(124, 58, 237, 0.35); }
+        .subject-tab.active-generic { background-color: #2563eb; color: white; border-color: #2563eb; box-shadow: 0 4px 14px 0 rgba(37, 99, 235, 0.35); }
 
         /* Styles spécifiques pour le lecteur vidéo principal */
         #mainVideoSection { transition: margin 0.2s ease; }
@@ -166,7 +167,7 @@
             <div class="lg:w-1/2 text-center lg:text-left">
                 <div class="inline-flex items-center gap-2 bg-brand-50 text-brand-700 px-3.5 py-1.5 rounded-full text-[11px] font-black mb-5 border border-brand-100 tracking-wider uppercase shadow-sm">
                     <span class="w-2 h-2 rounded-full bg-brand-500 animate-pulse"></span>
-                    <span>SVT • MATHS • PHYSIQUE-CHIMIE</span>
+                    <span id="headerSubjectsBadge">EXCELLENCE ACADÉMIE</span>
                 </div>
                 <h1 class="text-3xl sm:text-4xl lg:text-5xl font-black text-slate-900 mb-4 leading-[1.15] tracking-tight">
                     L'Excellence scientifique à portée de main.
@@ -193,11 +194,6 @@
                             <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2.5 ml-1">Filtrer par niveau</p>
                             <div class="grid grid-cols-2 sm:grid-cols-3 gap-2.5" id="filterContainer">
                                 <button data-filter="all" class="filter-btn active py-2.5 rounded-xl font-bold transition-all text-xs bg-slate-900 text-white shadow-md border border-transparent">Tout voir</button>
-                                <button data-filter="Terminale" class="filter-btn py-2.5 rounded-xl font-bold transition-all text-xs border border-slate-200 hover:border-slate-300 bg-white text-slate-600 shadow-sm">Terminale</button>
-                                <button data-filter="1ère S" class="filter-btn py-2.5 rounded-xl font-bold transition-all text-xs border border-slate-200 hover:border-slate-300 bg-white text-slate-600 shadow-sm">1ère S</button>
-                                <button data-filter="2nd S" class="filter-btn py-2.5 rounded-xl font-bold transition-all text-xs border border-slate-200 hover:border-slate-300 bg-white text-slate-600 shadow-sm">2nd S</button>
-                                <button data-filter="3ème" class="filter-btn py-2.5 rounded-xl font-bold transition-all text-xs border border-slate-200 hover:border-slate-300 bg-white text-slate-600 shadow-sm">3ème</button>
-                                <button data-filter="4ème" class="filter-btn py-2.5 rounded-xl font-bold transition-all text-xs border border-slate-200 hover:border-slate-300 bg-white text-slate-600 shadow-sm">4ème</button>
                                 <button data-filter="free" class="filter-btn py-2.5 rounded-xl font-bold transition-all text-xs border border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 shadow-sm col-span-full">Gratuit</button>
                             </div>
                         </div>
@@ -211,17 +207,7 @@
         <!-- LECTEUR VIDÉO PRINCIPAL DÉDIÉ (HORS DES CARTES) -->
         <div id="mainVideoSection" class="hidden mb-8 flex flex-col items-center scroll-mt-24"></div>
 
-        <div class="flex flex-wrap justify-center gap-2.5 sm:gap-3 mb-6">
-            <button onclick="switchMatiere('SVT')" id="btnMatSVT" class="subject-tab active-svt px-5 sm:px-6 py-3 rounded-2xl text-xs sm:text-sm font-bold transition-all duration-300 border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 flex items-center gap-2">
-                <i class="fas fa-leaf"></i> SVT
-            </button>
-            <button onclick="switchMatiere('MATHS')" id="btnMatMaths" class="subject-tab px-5 sm:px-6 py-3 rounded-2xl text-xs sm:text-sm font-bold transition-all duration-300 border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 flex items-center gap-2">
-                <i class="fas fa-calculator"></i> Mathématiques
-            </button>
-            <button onclick="switchMatiere('PC')" id="btnMatPC" class="subject-tab px-5 sm:px-6 py-3 rounded-2xl text-xs sm:text-sm font-bold transition-all duration-300 border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 flex items-center gap-2">
-                <i class="fas fa-atom"></i> Physique-Chimie
-            </button>
-        </div>
+        <div id="subjectTabsContainer" class="flex flex-wrap justify-center gap-2.5 sm:gap-3 mb-6"></div>
 
         <div class="flex justify-center mb-8">
             <div class="bg-white p-1.5 rounded-2xl border border-slate-200 shadow-sm inline-flex relative">
@@ -269,16 +255,12 @@
                         <span class="text-base font-bold">Excellence Académie</span>
                     </div>
                     <p class="text-slate-400 text-xs leading-relaxed max-w-xs">
-                        La plateforme éducative de référence pour exceller aux examens scientifiques (SVT, Mathématiques, Physique-Chimie) au Sénégal.
+                        La plateforme éducative de référence pour exceller aux examens scientifiques au Sénégal.
                     </p>
                 </div>
                 <div>
                     <h4 class="font-bold text-sm text-slate-200 uppercase tracking-wider mb-3">Matières disponibles</h4>
-                    <ul class="space-y-2 text-xs text-slate-400">
-                        <li><button onclick="switchMatiere('SVT')" class="hover:text-brand-400 transition flex items-center gap-2"><i class="fas fa-angle-right text-[10px]"></i> Sciences de la Vie et de la Terre</button></li>
-                        <li><button onclick="switchMatiere('MATHS')" class="hover:text-brand-400 transition flex items-center gap-2"><i class="fas fa-angle-right text-[10px]"></i> Mathématiques</button></li>
-                        <li><button onclick="switchMatiere('PC')" class="hover:text-brand-400 transition flex items-center gap-2"><i class="fas fa-angle-right text-[10px]"></i> Physique - Chimie</button></li>
-                    </ul>
+                    <ul id="footerSubjectsList" class="space-y-2 text-xs text-slate-400"></ul>
                 </div>
                 <div>
                     <h4 class="font-bold text-sm text-slate-200 uppercase tracking-wider mb-3">Assistance & Support</h4>
@@ -290,10 +272,35 @@
             </div>
             <div class="border-t border-slate-800 pt-6 flex flex-col md:flex-row justify-between items-center gap-3 text-[11px] text-slate-500 font-medium">
                 <p>&copy; 2026 Excellence Académie Sénégal. Tous droits réservés.</p>
-                <p>Réussite garantie pour Terminale, 1ère S, 2nd S, 3ème et 4ème.</p>
+                <p id="footerClassesText">Réussite garantie pour toutes les classes scientifiques.</p>
             </div>
         </div>
     </footer>
+
+    <!-- Automatic Welcome Modal for Non-Logged-In Visitors -->
+    <div id="welcomeVisitorModal" class="hidden fixed inset-0 z-[105] flex items-center justify-center p-4 sm:p-6 bg-slate-900/70 backdrop-blur-sm transition-opacity duration-300">
+        <div class="bg-white rounded-[2.5rem] p-6 sm:p-8 max-w-md w-full shadow-2xl relative animate-slide-up text-center border border-slate-100">
+            <button onclick="closeWelcomeVisitorModal()" class="absolute top-5 right-5 text-slate-400 hover:text-slate-900 transition h-9 w-9 flex items-center justify-center bg-slate-50 hover:bg-slate-100 rounded-full">
+                <i class="fas fa-times"></i>
+            </button>
+            <div class="w-16 h-16 bg-gradient-to-br from-brand-500 to-indigo-600 text-white rounded-2xl flex items-center justify-center text-2xl mx-auto mb-4 shadow-lg shadow-brand-500/30">
+                <i class="fas fa-door-open"></i>
+            </div>
+            <h2 class="text-2xl font-black text-slate-900 leading-tight mb-2">Bienvenue sur Excellence Académie ! 🇸🇳</h2>
+            <p class="text-xs sm:text-sm text-slate-600 leading-relaxed mb-6 font-medium">
+                Crée gratuitement ton compte élève dès aujourd'hui pour obtenir ta demande d'activation et accéder à tous tes cours scientifiques et annales.
+            </p>
+            <div class="flex flex-col gap-3">
+                <button onclick="closeWelcomeVisitorModal(); showAuthModal('signup');" class="w-full py-3.5 bg-brand-600 hover:bg-brand-700 text-white rounded-xl font-extrabold text-sm shadow-lg shadow-brand-600/30 transition transform hover:-translate-y-0.5 flex items-center justify-center gap-2">
+                    <i class="fas fa-user-plus"></i>
+                    <span>Commencer</span>
+                </button>
+                <button onclick="closeWelcomeVisitorModal(); showAuthModal('login');" class="w-full py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold text-xs sm:text-sm transition">
+                    Se connecter
+                </button>
+            </div>
+        </div>
+    </div>
 
     <!-- Modal d'authentification -->
     <div id="authModal" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 bg-slate-900/70 backdrop-blur-sm transition-opacity duration-300">
@@ -316,7 +323,7 @@
                         <i class="fas fa-gift text-emerald-500 text-lg"></i>
                         <div>
                             <p class="text-xs text-emerald-800 font-bold uppercase tracking-wider">Compte Gratuit</p>
-                            <p class="text-[10px] text-emerald-600 font-medium leading-tight">Obtiens ton identifiant ID immédiatement.</p>
+                            <p class="text-[10px] text-emerald-600 font-medium leading-tight">Crée ton compte et demande ton activation par WhatsApp.</p>
                         </div>
                     </div>
                     <div>
@@ -327,11 +334,6 @@
                         <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1.5 ml-1">Ta Classe</label>
                         <select id="regClasse" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:bg-white outline-none transition font-bold text-xs sm:text-sm text-slate-700 cursor-pointer">
                             <option value="">Sélectionner ta classe...</option>
-                            <option value="Terminale">Terminale</option>
-                            <option value="1ère S">1ère S</option>
-                            <option value="2nd S">2nd S</option>
-                            <option value="3ème">3ème</option>
-                            <option value="4ème">4ème</option>
                         </select>
                     </div>
                 </div>
@@ -340,7 +342,7 @@
                     <div>
                         <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2 text-center">Ton Code d'accès (ID)</label>
                         <input type="text" id="loginID" maxlength="30" placeholder="EX: E8A1" class="w-full px-4 py-4 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 outline-none transition uppercase text-center text-xl sm:text-2xl font-black tracking-widest shadow-inner text-brand-600 placeholder-slate-300">
-                        <p class="text-center text-[10px] text-slate-400 mt-2">Saisis le code reçu lors de ton inscription.</p>
+                        <p class="text-center text-[10px] text-slate-400 mt-2">Saisis le code d'accès qui vous a été transmis.</p>
                     </div>
                 </div>
                 
@@ -450,7 +452,7 @@
                     <div class="text-brand-300 text-xs font-bold uppercase tracking-wider mb-1 mt-1">Pack Excellence</div>
                     <div class="text-2xl font-black text-white mb-3"><span id="priceDisplayExcellence">5 000</span> FCFA<span class="text-xs text-slate-400 font-medium">/mois</span></div>
                     <ul class="space-y-2.5 mb-6 flex-grow text-xs text-slate-300 font-medium">
-                        <li class="flex gap-2"><i class="fas fa-check-circle text-brand-400 mt-0.5"></i> SVT + Maths + PC</li>
+                        <li class="flex gap-2"><i class="fas fa-check-circle text-brand-400 mt-0.5"></i> Toutes les matières</li>
                         <li class="flex gap-2"><i class="fas fa-check-circle text-brand-400 mt-0.5"></i> Accès total illimité</li>
                         <li class="flex gap-2"><i class="fas fa-check-circle text-brand-400 mt-0.5"></i> Support prioritaire WhatsApp</li>
                     </ul>
@@ -472,31 +474,39 @@
                 <h2 class="text-xl font-black text-slate-900 leading-tight">Sélectionne tes matières</h2>
                 <p id="subjectSelectionSubtitle" class="text-slate-500 mt-1 font-medium text-xs">Tu as choisi ton pack d'abonnement.</p>
             </div>
-            <div class="space-y-2.5 mb-6">
-                <button onclick="toggleSubjectSelection('SVT')" id="btnSelectSVT" class="w-full p-3.5 rounded-xl border-2 border-slate-200 bg-white flex items-center justify-between transition-all hover:border-brand-200 group">
-                    <div class="flex items-center gap-3">
-                        <div class="w-9 h-9 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center text-sm"><i class="fas fa-leaf"></i></div>
-                        <span class="font-bold text-slate-700 text-xs sm:text-sm">Sciences de la Vie et de la Terre</span>
-                    </div>
-                    <div class="w-5 h-5 rounded-full border-2 border-slate-300 check-indicator flex items-center justify-center text-white transition-colors"></div>
-                </button>
-                <button onclick="toggleSubjectSelection('MATHS')" id="btnSelectMATHS" class="w-full p-3.5 rounded-xl border-2 border-slate-200 bg-white flex items-center justify-between transition-all hover:border-brand-200 group">
-                    <div class="flex items-center gap-3">
-                        <div class="w-9 h-9 rounded-lg bg-red-50 text-red-600 flex items-center justify-center text-sm"><i class="fas fa-calculator"></i></div>
-                        <span class="font-bold text-slate-700 text-xs sm:text-sm">Mathématiques</span>
-                    </div>
-                    <div class="w-5 h-5 rounded-full border-2 border-slate-300 check-indicator flex items-center justify-center text-white transition-colors"></div>
-                </button>
-                <button onclick="toggleSubjectSelection('PC')" id="btnSelectPC" class="w-full p-3.5 rounded-xl border-2 border-slate-200 bg-white flex items-center justify-between transition-all hover:border-brand-200 group">
-                    <div class="flex items-center gap-3">
-                        <div class="w-9 h-9 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center text-sm"><i class="fas fa-atom"></i></div>
-                        <span class="font-bold text-slate-700 text-xs sm:text-sm">Physique - Chimie</span>
-                    </div>
-                    <div class="w-5 h-5 rounded-full border-2 border-slate-300 check-indicator flex items-center justify-center text-white transition-colors"></div>
-                </button>
-            </div>
+            <div id="subjectSelectionList" class="space-y-2.5 mb-6"></div>
             <button id="btnConfirmSubjects" onclick="confirmSubscription()" disabled class="w-full py-3.5 bg-brand-600 text-white rounded-xl font-bold text-xs sm:text-sm shadow-lg opacity-50 cursor-not-allowed transition-all flex items-center justify-center gap-2">
                 <span>Continuer vers WhatsApp</span> <i class="fab fa-whatsapp text-base"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Modal Instructions Activation Post-Inscription -->
+    <div id="activationModal" class="hidden fixed inset-0 z-[118] flex items-center justify-center p-4 sm:p-6 bg-slate-900/80 backdrop-blur-md overflow-y-auto">
+        <div class="bg-white rounded-[2.5rem] p-6 sm:p-8 max-w-md w-full shadow-2xl relative animate-slide-up text-center border border-slate-100 my-auto">
+            <div class="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-2xl flex items-center justify-center text-3xl mx-auto mb-4 shadow-inner">
+                <i class="fab fa-whatsapp"></i>
+            </div>
+            <h2 class="text-2xl font-black text-slate-900 leading-tight mb-2">Compte Enregistré !</h2>
+            <p class="text-xs sm:text-sm text-slate-600 font-medium leading-relaxed mb-4">
+                Votre compte a été créé avec succès et est en attente d'activation.
+            </p>
+            <div class="bg-amber-50 border border-amber-200 rounded-2xl p-4 text-left mb-6 space-y-2 text-xs text-amber-900 font-medium">
+                <p class="font-bold flex items-center gap-2 text-amber-800">
+                    <i class="fas fa-info-circle text-amber-600 text-sm"></i>
+                    Pour recevoir votre Code ID et activer votre accès :
+                </p>
+                <ol class="list-decimal list-inside space-y-1 text-slate-700 font-medium">
+                    <li>Envoyez le message pré-rempli à l'administrateur via WhatsApp.</li>
+                    <li>L'administrateur vous transmettra directement votre Code ID d'accès après vérification.</li>
+                </ol>
+            </div>
+            <button id="btnSendWhatsAppActivation" onclick="triggerWhatsAppActivation()" class="w-full py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-black text-sm shadow-lg shadow-emerald-600/30 transition transform hover:-translate-y-0.5 flex items-center justify-center gap-2 mb-3">
+                <i class="fab fa-whatsapp text-lg"></i>
+                <span>Envoyer le message d'activation</span>
+            </button>
+            <button onclick="closeActivationModal()" class="text-xs text-slate-400 font-bold hover:text-slate-600 transition">
+                Fermer
             </button>
         </div>
     </div>
@@ -562,18 +572,8 @@
                     <h3 class="text-sm font-black text-slate-800 mb-3"><i class="fas fa-plus-circle text-brand-600 mr-1.5"></i> Ajouter un nouveau cours</h3>
                     <form onsubmit="handleCreateCours(event)" class="grid grid-cols-1 md:grid-cols-3 gap-3">
                         <input type="text" id="newCoursTitre" placeholder="Titre du cours *" required maxlength="120" class="px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-semibold outline-none focus:ring-2 focus:ring-brand-500">
-                        <select id="newCoursMatiere" required class="px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-semibold">
-                            <option value="SVT">SVT</option>
-                            <option value="MATHS">Mathématiques</option>
-                            <option value="PC">Physique - Chimie</option>
-                        </select>
-                        <select id="newCoursClasse" required class="px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-semibold">
-                            <option value="Terminale">Terminale</option>
-                            <option value="1ère S">1ère S</option>
-                            <option value="2nd S">2nd S</option>
-                            <option value="3ème">3ème</option>
-                            <option value="4ème">4ème</option>
-                        </select>
+                        <select id="newCoursMatiere" required class="px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-semibold"></select>
+                        <select id="newCoursClasse" required class="px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-semibold"></select>
                         <select id="newCoursAcces" required class="px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-semibold">
                             <option value="premium">Premium</option>
                             <option value="free">Gratuit</option>
@@ -608,11 +608,7 @@
                     <h3 class="text-sm font-black text-slate-800 mb-3"><i class="fas fa-plus-circle text-amber-600 mr-1.5"></i> Ajouter une annale</h3>
                     <form onsubmit="handleCreateAnnale(event)" class="grid grid-cols-1 md:grid-cols-3 gap-3">
                         <input type="text" id="newAnnaleTitre" placeholder="Titre de l'annale *" required maxlength="120" class="px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-semibold outline-none">
-                        <select id="newAnnaleMatiere" required class="px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-semibold">
-                            <option value="SVT">SVT</option>
-                            <option value="MATHS">Mathématiques</option>
-                            <option value="PC">Physique - Chimie</option>
-                        </select>
+                        <select id="newAnnaleMatiere" required class="px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-semibold"></select>
                         <input type="number" id="newAnnalePrix" placeholder="Prix en FCFA *" required min="0" max="1000000" class="px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-semibold outline-none">
                         <input type="text" id="newAnnalePdf" placeholder="Lien Extrait PDF *" required maxlength="255" class="px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-semibold outline-none col-span-1 md:col-span-2">
                         <button type="submit" class="px-4 py-2.5 bg-amber-600 text-white rounded-xl font-bold text-xs hover:bg-amber-700 transition flex items-center justify-center gap-2">
@@ -678,7 +674,24 @@
         
         const sbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        // Application Global State
+        // Dynamic Fallbacks for Classes and Subjects
+        const FALLBACK_CLASSES = ['Terminale', '1ère S', '2nd S', '3ème', '4ème'];
+        const FALLBACK_MATIERES = ['SVT', 'MATHS', 'PC'];
+
+        // Known metadata mapping for standard subjects (fallback styling for dynamic unknown subjects)
+       const SUBJECT_METADATA = {
+    'SVT': { label: 'SVT', fullName: 'Sciences de la Vie et de la Terre', icon: 'fa-leaf', tabStyle: 'active-svt', colorClass: 'bg-emerald-50 text-emerald-600' },
+    'MATHS': { label: 'Mathématiques', fullName: 'Mathématiques', icon: 'fa-calculator', tabStyle: 'active-maths', colorClass: 'bg-red-50 text-red-600' },
+    'PC': { label: 'Physique-Chimie', fullName: 'Physique - Chimie', icon: 'fa-atom', tabStyle: 'active-pc', colorClass: 'bg-purple-50 text-purple-600' },
+    'Philo': { label: 'Philosophie', fullName: 'Philosophie', icon: 'fa-brain', tabStyle: 'active-generic', colorClass: 'bg-amber-50 text-amber-600' },
+    'Francais': { label: 'Français', fullName: 'Français', icon: 'fa-book', tabStyle: 'active-generic', colorClass: 'bg-blue-50 text-blue-600' },
+    'Anglais': { label: 'Anglais', fullName: 'Anglais', icon: 'fa-language', tabStyle: 'active-generic', colorClass: 'bg-indigo-50 text-indigo-600' },
+    'Espagnol': { label: 'Espagnol', fullName: 'Espagnol', icon: 'fa-comment-alt', tabStyle: 'active-generic', colorClass: 'bg-orange-50 text-orange-600' },
+    'arabe': { label: 'Arabe', fullName: 'Arabe', icon: 'fa-pen-nib', tabStyle: 'active-generic', colorClass: 'bg-teal-50 text-teal-600' },
+    'HG': { label: 'Histoire-Géo', fullName: 'Histoire et Géographie', icon: 'fa-globe', tabStyle: 'active-generic', colorClass: 'bg-sky-50 text-sky-600' }
+};
+
+        // Global State
         let adminPhone = "221768776668";
         let dbParameters = {};
         let allCourses = [];
@@ -691,6 +704,10 @@
         let currentAuthMode = 'login';
         let currentUser = null;
         let intendedPremiumMatiere = null;
+        
+        let dynamicClasses = [];
+        let dynamicMatieres = [];
+        let pendingActivationWhatsAppUrl = '';
         
         let currentPackToSubscribe = '';
         let maxSubjectsAllowed = 0;
@@ -707,6 +724,48 @@
             "L'excellence n'est pas un acte, mais une habitude.",
             "Ton BAC et ton BFEM se préparent dès aujourd'hui."
         ];
+
+        // Helper functions for dynamic subjects & classes
+        function getSubjectMeta(matiereKey) {
+            const key = String(matiereKey || '').toUpperCase().trim();
+            if (SUBJECT_METADATA[key]) return SUBJECT_METADATA[key];
+            return {
+                label: matiereKey || 'Matière',
+                fullName: matiereKey || 'Matière',
+                icon: 'fa-book-open',
+                tabStyle: 'active-generic',
+                colorClass: 'bg-blue-50 text-blue-600'
+            };
+        }
+
+        function normalizeString(str) {
+            return String(str || '')
+                .toLowerCase()
+                .normalize("NFD")
+                .replace(/[\u0300-\u036f]/g, "")
+                .replace(/\s+/g, ' ')
+                .trim();
+        }
+
+        // Automatic Welcome Modal for Non-Logged-In Visitors
+        function checkAndShowWelcomeVisitorModal() {
+            if (currentUser) return;
+            const shownInSession = sessionStorage.getItem('excellence_welcome_shown');
+            if (!shownInSession) {
+                setTimeout(() => {
+                    const welcomeModal = document.getElementById('welcomeVisitorModal');
+                    if (welcomeModal && !currentUser) {
+                        welcomeModal.classList.remove('hidden');
+                        sessionStorage.setItem('excellence_welcome_shown', 'true');
+                    }
+                }, 750);
+            }
+        }
+
+        function closeWelcomeVisitorModal() {
+            const welcomeModal = document.getElementById('welcomeVisitorModal');
+            if (welcomeModal) welcomeModal.classList.add('hidden');
+        }
 
         // ============================================================
         // DÉTECTION D'APPAREIL ET DE NAVIGATEUR
@@ -727,9 +786,6 @@
                 || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
         }
 
-        // Fonction de nettoyage anti-XSS et sécurisation des chaînes
-        // (idempotente : décode d'abord les entités déjà présentes pour éviter le double échappement,
-        //  ce qui cassait les formules contenant < > & ou ')
         function sanitizeInput(str) {
             if (!str) return '';
             return String(str)
@@ -746,7 +802,6 @@
                 .replace(/'/g, '&#x27;');
         }
 
-        // Argument JS sûr pour un attribut onclick="..." : conserve les \ (LaTeX) et les apostrophes
         function jsArg(str) {
             const raw = String(str == null ? '' : str)
                 .replace(/&#x27;/g, "'").replace(/&quot;/g, '"')
@@ -757,7 +812,6 @@
                 .replace(/"/g, '&quot;').replace(/'/g, '&#x27;');
         }
 
-        // Rendu LaTeX (KaTeX) : attend que auto-render soit chargé si besoin
         const MATH_OPTIONS = {
             delimiters: [
                 {left: '$$', right: '$$', display: true},
@@ -800,11 +854,7 @@
                 searchQuery = sanitizeInput(e.target.value); 
                 render(); 
             });
-            document.querySelectorAll('.filter-btn').forEach(btn => {
-                btn.addEventListener('click', (e) => handleFilterClick(e.target));
-            });
 
-            // Alerte WebView in-app
             if (isInAppBrowser()) {
                 setTimeout(() => {
                     showToast("Pour une meilleure lecture des vidéos, ouvrez ce site dans Chrome ou Safari.", "warning");
@@ -879,6 +929,126 @@
             }
         }
 
+        function extractDynamicLists() {
+            const classesSet = new Set();
+            const matieresSet = new Set();
+
+            allCourses.forEach(c => {
+                if (c.classe && String(c.classe).trim()) classesSet.add(String(c.classe).trim());
+                if (c.matiere && String(c.matiere).trim()) matieresSet.add(String(c.matiere).trim());
+            });
+
+            allAnnales.forEach(a => {
+                if (a.matiere && String(a.matiere).trim()) matieresSet.add(String(a.matiere).trim());
+            });
+
+            dynamicClasses = Array.from(classesSet);
+            dynamicMatieres = Array.from(matieresSet);
+
+            if (dynamicClasses.length === 0) dynamicClasses = [...FALLBACK_CLASSES];
+            if (dynamicMatieres.length === 0) dynamicMatieres = [...FALLBACK_MATIERES];
+
+            if (!dynamicMatieres.includes(currentMatiere)) {
+                currentMatiere = dynamicMatieres[0] || 'SVT';
+            }
+
+            updateDynamicUIElements();
+        }
+
+        function updateDynamicUIElements() {
+            // 1. Level Filter Buttons
+            const filterContainer = document.getElementById('filterContainer');
+            if (filterContainer) {
+                filterContainer.innerHTML = `
+                    <button data-filter="all" class="filter-btn ${currentFilter === 'all' ? 'active bg-slate-900 text-white border-transparent' : 'border border-slate-200 bg-white text-slate-600'} py-2.5 rounded-xl font-bold transition-all text-xs shadow-md">Tout voir</button>
+                    ${dynamicClasses.map(cls => `
+                        <button data-filter="${sanitizeInput(cls)}" class="filter-btn ${currentFilter === cls ? 'active bg-slate-900 text-white border-transparent' : 'border border-slate-200 hover:border-slate-300 bg-white text-slate-600 shadow-sm'} py-2.5 rounded-xl font-bold transition-all text-xs">${sanitizeInput(cls)}</button>
+                    `).join('')}
+                    <button data-filter="free" class="filter-btn ${currentFilter === 'free' ? 'active bg-emerald-600 text-white border-transparent' : 'border border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100'} py-2.5 rounded-xl font-bold transition-all text-xs shadow-sm col-span-full">Gratuit</button>
+                `;
+
+                filterContainer.querySelectorAll('.filter-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => handleFilterClick(e.target));
+                });
+            }
+
+            // 2. Subject Tabs
+            const subjectTabsContainer = document.getElementById('subjectTabsContainer');
+            if (subjectTabsContainer) {
+                subjectTabsContainer.innerHTML = dynamicMatieres.map(mat => {
+                    const meta = getSubjectMeta(mat);
+                    const isActive = currentMatiere === mat;
+                    const activeClass = isActive ? (meta.tabStyle || 'active-generic') : '';
+                    return `
+                        <button onclick="switchMatiere('${sanitizeInput(mat)}')" id="btnMat_${sanitizeInput(mat)}" class="subject-tab ${activeClass} px-5 sm:px-6 py-3 rounded-2xl text-xs sm:text-sm font-bold transition-all duration-300 border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 flex items-center gap-2">
+                            <i class="fas ${meta.icon}"></i> <span>${sanitizeInput(meta.label)}</span>
+                        </button>
+                    `;
+                }).join('');
+            }
+
+            // 3. Signup Form Class Selector
+            const regClasseSelect = document.getElementById('regClasse');
+            if (regClasseSelect) {
+                const currentVal = regClasseSelect.value;
+                regClasseSelect.innerHTML = `<option value="">Sélectionner ta classe...</option>` +
+                    dynamicClasses.map(cls => `<option value="${sanitizeInput(cls)}">${sanitizeInput(cls)}</option>`).join('');
+                if (currentVal && dynamicClasses.includes(currentVal)) regClasseSelect.value = currentVal;
+            }
+
+            // 4. Header Badges & Footer Lists
+            const headerBadge = document.getElementById('headerSubjectsBadge');
+            if (headerBadge) {
+                headerBadge.innerText = dynamicMatieres.map(m => getSubjectMeta(m).label.toUpperCase()).join(' • ');
+            }
+
+            const footerList = document.getElementById('footerSubjectsList');
+            if (footerList) {
+                footerList.innerHTML = dynamicMatieres.map(mat => {
+                    const meta = getSubjectMeta(mat);
+                    return `<li><button onclick="switchMatiere('${sanitizeInput(mat)}')" class="hover:text-brand-400 transition flex items-center gap-2"><i class="fas fa-angle-right text-[10px]"></i> ${sanitizeInput(meta.fullName)}</button></li>`;
+                }).join('');
+            }
+
+            const footerClassesText = document.getElementById('footerClassesText');
+            if (footerClassesText && dynamicClasses.length > 0) {
+                footerClassesText.innerText = `Réussite garantie pour ${dynamicClasses.join(', ')}.`;
+            }
+
+            // 5. Admin Form Selectors
+            const newCoursMatiere = document.getElementById('newCoursMatiere');
+            if (newCoursMatiere) {
+                newCoursMatiere.innerHTML = dynamicMatieres.map(m => `<option value="${sanitizeInput(m)}">${sanitizeInput(getSubjectMeta(m).label)}</option>`).join('');
+            }
+
+            const newCoursClasse = document.getElementById('newCoursClasse');
+            if (newCoursClasse) {
+                newCoursClasse.innerHTML = dynamicClasses.map(c => `<option value="${sanitizeInput(c)}">${sanitizeInput(c)}</option>`).join('');
+            }
+
+            const newAnnaleMatiere = document.getElementById('newAnnaleMatiere');
+            if (newAnnaleMatiere) {
+                newAnnaleMatiere.innerHTML = dynamicMatieres.map(m => `<option value="${sanitizeInput(m)}">${sanitizeInput(getSubjectMeta(m).label)}</option>`).join('');
+            }
+
+            // 6. Subject Selection Modal
+            const subjectSelectionList = document.getElementById('subjectSelectionList');
+            if (subjectSelectionList) {
+                subjectSelectionList.innerHTML = dynamicMatieres.map(mat => {
+                    const meta = getSubjectMeta(mat);
+                    return `
+                        <button onclick="toggleSubjectSelection('${sanitizeInput(mat)}')" id="btnSelect_${sanitizeInput(mat)}" class="w-full p-3.5 rounded-xl border-2 border-slate-200 bg-white flex items-center justify-between transition-all hover:border-brand-200 group">
+                            <div class="flex items-center gap-3">
+                                <div class="w-9 h-9 rounded-lg ${meta.colorClass} flex items-center justify-center text-sm"><i class="fas ${meta.icon}"></i></div>
+                                <span class="font-bold text-slate-700 text-xs sm:text-sm">${sanitizeInput(meta.fullName)}</span>
+                            </div>
+                            <div class="w-5 h-5 rounded-full border-2 border-slate-300 check-indicator flex items-center justify-center text-white transition-colors"></div>
+                        </button>
+                    `;
+                }).join('');
+            }
+        }
+
         async function init() {
             updateUIForUser();
             showStatus('loader');
@@ -926,9 +1096,14 @@
                 });
                 
                 allAnnales = (annalesData || []).map(a => ({ ...a, matiere: a.matiere || 'SVT' }));
+
+                extractDynamicLists();
                 render();
+                checkAndShowWelcomeVisitorModal();
             } catch (err) { 
+                extractDynamicLists();
                 showStatus('noResults'); 
+                checkAndShowWelcomeVisitorModal();
             }
         }
 
@@ -995,11 +1170,9 @@
                     `<div class="flex items-start gap-2 text-xs font-medium text-slate-500"><i class="fas fa-check text-brand-400 mt-0.5 text-[10px]"></i><span class="leading-relaxed">${sanitizeInput(o.description)}</span></div>`
                 ).join('');
 
-                let iconClass = 'fa-book'; 
-                let iconColor = 'bg-brand-50 text-brand-600';
-                if(currentMatiere === 'SVT') { iconClass = 'fa-leaf'; iconColor = 'bg-emerald-50 text-emerald-600'; }
-                if(currentMatiere === 'MATHS') { iconClass = 'fa-calculator'; iconColor = 'bg-red-50 text-red-600'; }
-                if(currentMatiere === 'PC') { iconClass = 'fa-atom'; iconColor = 'bg-purple-50 text-purple-600'; }
+                const meta = getSubjectMeta(currentMatiere);
+                let iconClass = course.icone || meta.icon; 
+                let iconColor = meta.colorClass;
 
                 const videoId = sanitizeInput(course.url_vid || '');
 
@@ -1007,7 +1180,7 @@
                     <div class="flex justify-between items-start mb-5">
                         <div class="flex items-center gap-3">
                             <div class="w-12 h-12 ${iconColor} rounded-2xl flex items-center justify-center text-lg shadow-sm transition-colors duration-300 relative">
-                                <i class="fas ${sanitizeInput(course.icone || iconClass)}"></i>
+                                <i class="fas ${sanitizeInput(iconClass)}"></i>
                             </div>
                             <div>
                                 <span class="text-[9px] font-black uppercase tracking-wider text-slate-400 bg-slate-50 px-2 py-0.5 rounded-md border border-slate-100">${sanitizeInput(course.classe)}</span>
@@ -1070,8 +1243,6 @@
             return { embed: v, external: v };
         }
 
-        // Hauteur (px) de la barre noire que le lecteur Google Drive ajoute en haut de son iframe.
-        // Réduite sur mobile où la barre Drive est plus compacte.
         function getDriveBarPx() {
             return isMobileDevice() ? 48 : 56;
         }
@@ -1092,7 +1263,6 @@
             const mobile = isMobileDevice();
             const inApp = isInAppBrowser();
 
-            // Construction du HTML du lecteur
             let html = `
                 <div id="mainVideoFrame" class="relative w-full bg-black overflow-hidden rounded-2xl" style="aspect-ratio: 16/9;">
                     <div id="mainVideoBody" class="absolute inset-0 flex items-center justify-center text-slate-500">
@@ -1121,7 +1291,6 @@
                     </div>
                 </div>`;
 
-            // Bandeau d'aide spécifique mobile / WebView in-app
             if (mobile || inApp) {
                 let warningText = "";
                 if (inApp) {
@@ -1144,7 +1313,6 @@
             section.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
 
-        // Plein écran natif sur le cadre (fonctionne bien sur Android, et iOS 15+)
         function toggleVideoFullscreen() {
             const frame = document.getElementById('mainVideoFrame');
             if (!frame) return;
@@ -1153,7 +1321,6 @@
                 const req = frame.requestFullscreen || frame.webkitRequestFullscreen || frame.msRequestFullscreen;
                 if (req) {
                     req.call(frame).catch(() => {
-                        // Fallback iOS : ouvrir dans Drive
                         if (isIOS() && currentVideoExternal) {
                             showToast("Plein écran non supporté, ouverture dans Drive...", "info");
                             openVideoExternal();
@@ -1169,7 +1336,6 @@
             }
         }
 
-        // Ajuste le cadre 16/9 : pleine largeur, hauteur limitée à la zone visible
         function fitMainVideo() {
             const section = document.getElementById('mainVideoSection');
             if (!section || section.classList.contains('hidden')) return;
@@ -1180,15 +1346,12 @@
             const vw = document.documentElement.clientWidth;
             const vh = window.visualViewport ? window.visualViewport.height : window.innerHeight;
 
-            // Le lecteur sort du conteneur et occupe toute la largeur de l'écran
             const parent = section.parentElement;
             const cs = getComputedStyle(parent);
             const parentLeft = parent.getBoundingClientRect().left + parseFloat(cs.paddingLeft);
             section.style.width = vw + 'px';
             section.style.marginLeft = (-parentLeft) + 'px';
 
-            // 16/9 strict : on prend la plus petite dimension entre "largeur écran" et "hauteur disponible * 16/9"
-            // Pas de plancher 240px qui débordait sur mobile
             const availH = Math.max(vh - navH - 16, 180);
             const wByHeight = availH * 16 / 9;
             const w = Math.min(vw, wByHeight);
@@ -1205,7 +1368,7 @@
         function closeMainVideo() {
             const section = document.getElementById('mainVideoSection');
             section.classList.add('hidden');
-            section.innerHTML = ''; // Arrête la lecture et libère le DOM
+            section.innerHTML = ''; 
             currentVideoExternal = '';
         }
 
@@ -1364,19 +1527,15 @@
 
         function switchMatiere(matiere) {
             currentMatiere = matiere;
-            document.querySelectorAll('.subject-tab').forEach(btn => btn.classList.remove('active-svt', 'active-maths', 'active-pc'));
-            if(matiere === 'SVT') document.getElementById('btnMatSVT').classList.add('active-svt');
-            if(matiere === 'MATHS') document.getElementById('btnMatMaths').classList.add('active-maths');
-            if(matiere === 'PC') document.getElementById('btnMatPC').classList.add('active-pc');
+            updateDynamicUIElements();
             render();
         }
 
         function showPremiumOptionsModal() { 
             const msgEl = document.getElementById('premiumTargetMatiereMsg');
             if(intendedPremiumMatiere) {
-                let subjectName = intendedPremiumMatiere; 
-                if(subjectName === 'PC') subjectName = 'Physique-Chimie';
-                msgEl.innerText = `Accès restreint : Les cours de ${subjectName} nécessitent un abonnement.`;
+                const meta = getSubjectMeta(intendedPremiumMatiere);
+                msgEl.innerText = `Accès restreint : Les cours de ${meta.fullName} nécessitent un abonnement.`;
                 msgEl.classList.remove('hidden');
             } else { 
                 msgEl.classList.add('hidden'); 
@@ -1391,7 +1550,7 @@
 
         function orderSubscription(packType) {
             if (packType === 'EXCELLENCE') { 
-                sendWhatsAppSubscription('EXCELLENCE', ['SVT', 'Mathématiques', 'Physique-Chimie']); 
+                sendWhatsAppSubscription('EXCELLENCE', dynamicMatieres.map(m => getSubjectMeta(m).fullName)); 
                 return; 
             }
             currentPackToSubscribe = packType; 
@@ -1424,11 +1583,11 @@
         }
 
         function updateSubjectSelectionUI() {
-            const subjects = [ { id: 'SVT', el: 'btnSelectSVT' }, { id: 'MATHS', el: 'btnSelectMATHS' }, { id: 'PC', el: 'btnSelectPC' } ];
-            subjects.forEach(sub => {
-                const btn = document.getElementById(sub.el); 
+            dynamicMatieres.forEach(sub => {
+                const btn = document.getElementById(`btnSelect_${sub}`); 
+                if (!btn) return;
                 const indicator = btn.querySelector('.check-indicator');
-                if (selectedSubjectsForSub.includes(sub.id)) {
+                if (selectedSubjectsForSub.includes(sub)) {
                     btn.classList.remove('border-slate-200', 'bg-white'); 
                     btn.classList.add('border-brand-500', 'bg-brand-50');
                     indicator.classList.remove('border-slate-300'); 
@@ -1461,20 +1620,16 @@
 
         function confirmSubscription() {
             if (selectedSubjectsForSub.length !== maxSubjectsAllowed) return;
-            const displayNames = selectedSubjectsForSub.map(s => { 
-                if (s === 'MATHS') return 'Mathématiques'; 
-                if (s === 'PC') return 'Physique-Chimie'; 
-                return 'SVT'; 
-            });
+            const displayNames = selectedSubjectsForSub.map(s => getSubjectMeta(s).fullName);
             sendWhatsAppSubscription(currentPackToSubscribe, displayNames); 
             closeSubjectSelectionModal(); 
             intendedPremiumMatiere = null; 
         }
 
         function sendWhatsAppSubscription(packType, subjectsArray) {
-            let nomClient = currentUser ? `*${sanitizeInput(currentUser.nom)}* (Classe: ${sanitizeInput(currentUser.classe)}, ID: ${sanitizeInput(currentUser.id)})` : "un élève";
-            let packName = packType === 'EXCELLENCE' ? 'PACK EXCELLENCE (3 Matières)' : packType === 'DUO' ? 'PACK DUO (2 Matières)' : 'PACK SOLO (1 Matière)';
-            let message = `Bonjour Excellence Académie ! 👋\nC'est ${nomClient}.\n\nJe souhaite souscrire au *${packName}* 🚀\nMatières : *${subjectsArray.join(' et ')}*\n\nQuelles sont les instructions pour effectuer le paiement ?`;
+            let nomClient = currentUser ? `*${sanitizeInput(currentUser.nom)}* (Classe: ${sanitizeInput(currentUser.classe)})` : "un élève";
+            let packName = packType === 'EXCELLENCE' ? 'PACK EXCELLENCE' : packType === 'DUO' ? 'PACK DUO (2 Matières)' : 'PACK SOLO (1 Matière)';
+            let message = `Bonjour Excellence Académie ! 👋\nC'est ${nomClient}.\n\nJe souhaite souscrire au *${packName}* 🚀\nMatières : *${subjectsArray.join(' et ')}*\n\nQuelles sont les instructions pour effectuer le paiement et activer mon accès ?`;
             window.open(`https://wa.me/${adminPhone}?text=${encodeURIComponent(message)}`, '_blank');
         }
 
@@ -1484,8 +1639,8 @@
             const s=document.getElementById('signupFields'), l=document.getElementById('loginFields'), t=document.getElementById('authTitle'), b=document.getElementById('authBtnLabel'), ft=document.getElementById('authFooterText'), fb=document.getElementById('authFooterBtn');
             if (mode === 'signup') { 
                 s.classList.remove('hidden'); l.classList.add('hidden'); 
-                t.innerText = "Inscription Gratuite"; b.innerText = "Générer mon Code ID"; 
-                ft.innerText = "Déjà un ID ?"; fb.innerText = "Se connecter"; 
+                t.innerText = "Inscription Gratuite"; b.innerText = "Créer mon compte"; 
+                ft.innerText = "Déjà un compte ?"; fb.innerText = "Se connecter"; 
             } else { 
                 s.classList.add('hidden'); l.classList.remove('hidden'); 
                 t.innerText = "Espace Élève"; b.innerText = "Se connecter"; 
@@ -1495,6 +1650,16 @@
 
         function toggleAuthMode() { showAuthModal(currentAuthMode === 'login' ? 'signup' : 'login'); }
         function closeAuthModal() { document.getElementById('authModal').classList.add('hidden'); }
+
+        function closeActivationModal() {
+            document.getElementById('activationModal').classList.add('hidden');
+        }
+
+        function triggerWhatsAppActivation() {
+            if (pendingActivationWhatsAppUrl) {
+                window.open(pendingActivationWhatsAppUrl, '_blank');
+            }
+        }
 
         async function handleAuth(e) {
             e.preventDefault(); 
@@ -1511,17 +1676,57 @@
                     
                     const motsNom = nom.split(/\s+/);
                     if (motsNom.length < 2) throw new Error("Veuillez taper votre prénom ET votre nom complet (ex: Moussa Diop).");
-                    
-                    const id = "E" + Math.random().toString(36).substring(2, 5).toUpperCase();
-                    const { error } = await sbClient.from('eleves').insert([{ id, nom, classe, actif: false, abonnements: ['SVT'] }]);
+
+                    // Check duplicate on application side only
+                    const normNom = normalizeString(nom);
+                    const normClasse = normalizeString(classe);
+
+                    const { data: existingEleves, error: fetchError } = await sbClient
+                        .from('eleves')
+                        .select('nom, classe');
+
+                    if (fetchError) throw fetchError;
+
+                    const isDuplicate = (existingEleves || []).some(e => 
+                        normalizeString(e.nom) === normNom && normalizeString(e.classe) === normClasse
+                    );
+
+                    if (isDuplicate) {
+                        const duplicateMsg = `Un compte existe déjà pour "${nom}" en classe de ${classe}.\n\nSi vous avez perdu votre Code ID, veuillez contacter l'administrateur sur WhatsApp pour le récupérer.`;
+                        showToast("Ce compte existe déjà.", "error");
+                        setTimeout(() => {
+                            if (confirm(`${duplicateMsg}\n\nSouhaitez-vous contacter le support WhatsApp dès maintenant ?`)) {
+                                const supportMsg = `Bonjour Excellence Académie ! 👋\nJ'ai déjà un compte au nom de *${nom}* (${classe}) mais j'ai perdu mon Code ID. Pouvez-vous me le réafficher ?`;
+                                window.open(`https://wa.me/${adminPhone}?text=${encodeURIComponent(supportMsg)}`, '_blank');
+                            }
+                        }, 200);
+                        return;
+                    }
+
+                    // Create inactive account - Never display Code ID to student
+                    const generatedId = "E" + Math.random().toString(36).substring(2, 5).toUpperCase();
+                    const internalRef = `REF-${generatedId}-${Math.floor(1000 + Math.random() * 9000)}`;
+
+                    const { error } = await sbClient.from('eleves').insert([{
+                        id: generatedId,
+                        nom: nom,
+                        classe: classe,
+                        actif: false,
+                        abonnements: [dynamicMatieres[0] || 'SVT']
+                    }]);
                     if (error) throw error;
+
+                    closeAuthModal();
+
+                    const activationMsg = `Bonjour Excellence Académie ! 👋\nJe viens de créer mon compte sur le site.\n👤 Nom : *${nom}*\n🏫 Classe : *${classe}*\n📌 Réf d'activation : *${internalRef}*\n\nJe souhaite valider mon inscription et obtenir mon Code ID d'accès.`;
+                    pendingActivationWhatsAppUrl = `https://wa.me/${adminPhone}?text=${encodeURIComponent(activationMsg)}`;
+
+                    document.getElementById('activationModal').classList.remove('hidden');
                     
-                    showToast(`Compte créé avec succès ! Ton Code ID est : ${id}`, "success");
-                    const msg = `Bonjour Excellence Académie ! 👋\nJe viens de créer mon compte sur le site.\n👤 Nom : *${nom}*\n🏫 Classe : *${classe}*\n🔑 Code ID : *${id}*\n\nJe souhaite activer mon compte.`;
-                    setTimeout(() => { 
-                        window.open(`https://wa.me/${adminPhone}?text=${encodeURIComponent(msg)}`, '_blank'); 
-                        closeAuthModal(); 
-                    }, 1200);
+                    setTimeout(() => {
+                        triggerWhatsAppActivation();
+                    }, 800);
+
                 } else {
                     const inputVal = sanitizeInput(document.getElementById('loginID').value);
                     if (!inputVal) throw new Error("Saisis ton code d'accès.");
@@ -1533,7 +1738,7 @@
                             nom: 'Administrateur',
                             classe: 'Admin',
                             actif: true,
-                            abonnements: ['SVT', 'MATHS', 'PC'],
+                            abonnements: [...dynamicMatieres],
                             isAdmin: true,
                             login_time: Date.now()
                         };
@@ -1549,6 +1754,10 @@
                     const { data, error } = await sbClient.from('eleves').select('id, nom, classe, actif, abonnements, date_expiration, device_id').eq('id', id).single();
                     if (error || !data) throw new Error("Code d'accès introuvable.");
 
+                    if (data.actif !== true) {
+                        throw new Error("Votre compte est en attente d'activation. Contactez l'administrateur sur WhatsApp.");
+                    }
+
                     const currentDeviceId = getDeviceID();
                     if (data.device_id && data.device_id !== currentDeviceId) {
                         throw new Error("Ce code d'accès est déjà lié à un autre appareil.");
@@ -1556,7 +1765,7 @@
                         await sbClient.from('eleves').update({ device_id: currentDeviceId }).eq('id', id);
                     }
 
-                    if(!data.abonnements) data.abonnements = data.actif ? ['SVT'] : [];
+                    if(!data.abonnements) data.abonnements = data.actif ? [dynamicMatieres[0] || 'SVT'] : [];
                     data.login_time = Date.now();
                     currentUser = data; 
                     localStorage.setItem('svt_user_session', JSON.stringify(data));
@@ -1807,7 +2016,9 @@
         function handleFilterClick(clickedBtn) {
             const btn = clickedBtn.closest('.filter-btn'); 
             if(!btn) return;
-            document.querySelectorAll('.filter-btn').forEach(b => b.className = 'filter-btn py-2.5 rounded-xl font-bold transition-all text-xs border border-slate-200 hover:border-slate-300 bg-white text-slate-600 shadow-sm');
+            document.querySelectorAll('.filter-btn').forEach(b => {
+                b.className = 'filter-btn py-2.5 rounded-xl font-bold transition-all text-xs border border-slate-200 hover:border-slate-300 bg-white text-slate-600 shadow-sm';
+            });
             btn.className = 'filter-btn active py-2.5 rounded-xl font-bold transition-all text-xs bg-slate-900 text-white shadow-md border border-transparent';
             if (btn.dataset.filter === 'free') btn.classList.add('bg-emerald-600', 'shadow-emerald-200');
             currentFilter = btn.dataset.filter; 
@@ -1824,7 +2035,7 @@
         function resetFiltersAndReload() {
             closeMainVideo();
             resetFilters();
-            switchMatiere('SVT');
+            switchMatiere(dynamicMatieres[0] || 'SVT');
             switchView('cours');
         }
 
@@ -1944,6 +2155,11 @@
                 const isActif = eleve.actif === true;
                 const expDate = eleve.date_expiration ? eleve.date_expiration.split('T')[0] : 'Non définie';
 
+                const abosButtons = dynamicMatieres.map(m => {
+                    const hasMatiere = abos.includes(m);
+                    return `<button onclick="toggleAdminAbo('${eleve.id}', '${sanitizeInput(m)}')" class="px-2 py-0.5 rounded text-[10px] font-bold ${hasMatiere ? 'bg-purple-100 text-purple-800 border border-purple-300' : 'bg-slate-100 text-slate-400'}">${sanitizeInput(m)}</button>`;
+                }).join(' ');
+
                 tr.innerHTML = `
                     <td class="p-3 font-black text-purple-700">${sanitizeInput(eleve.id)}</td>
                     <td class="p-3">
@@ -1951,11 +2167,7 @@
                         <div class="text-[10px] text-slate-400 font-bold uppercase">${sanitizeInput(eleve.classe)}</div>
                     </td>
                     <td class="p-3">
-                        <div class="flex gap-1">
-                            <button onclick="toggleAdminAbo('${eleve.id}', 'SVT')" class="px-2 py-0.5 rounded text-[10px] font-bold ${abos.includes('SVT') ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' : 'bg-slate-100 text-slate-400'}">SVT</button>
-                            <button onclick="toggleAdminAbo('${eleve.id}', 'MATHS')" class="px-2 py-0.5 rounded text-[10px] font-bold ${abos.includes('MATHS') ? 'bg-red-100 text-red-800 border border-red-300' : 'bg-slate-100 text-slate-400'}">MATHS</button>
-                            <button onclick="toggleAdminAbo('${eleve.id}', 'PC')" class="px-2 py-0.5 rounded text-[10px] font-bold ${abos.includes('PC') ? 'bg-purple-100 text-purple-800 border border-purple-300' : 'bg-slate-100 text-slate-400'}">PC</button>
-                        </div>
+                        <div class="flex flex-wrap gap-1">${abosButtons}</div>
                     </td>
                     <td class="p-3 font-medium text-slate-600">${expDate}</td>
                     <td class="p-3">
@@ -2145,7 +2357,7 @@
                 showToast("Annale supprimée", "info");
                 sessionStorage.removeItem('sb_cache_annales');
                 await init();
-                renderAdminAnnale();
+                renderAdminAnnales();
             }
         }
 
