@@ -411,7 +411,7 @@
         </div>
     </div>
 
-    <!-- Modal Packs / Abonnements -->
+    <!-- Modal Packs / Abonnements par durée -->
     <div id="premiumOptionsModal" class="hidden fixed inset-0 z-[110] flex items-center justify-center p-4 sm:p-6 bg-slate-900/80 backdrop-blur-md overflow-y-auto">
         <div class="bg-white rounded-[2rem] w-full max-w-4xl shadow-2xl relative animate-slide-up my-auto">
             <button onclick="closePremiumOptionsModal()" class="absolute top-4 right-4 z-10 text-slate-400 hover:text-slate-900 transition h-9 w-9 flex items-center justify-center bg-slate-50 hover:bg-slate-100 rounded-full">
@@ -419,65 +419,52 @@
             </button>
             
             <div class="p-6 md:p-8 text-center border-b border-slate-100">
-                <h2 class="text-2xl sm:text-3xl font-black text-slate-900 mb-1.5">Passe au niveau supérieur</h2>
-                <p class="text-slate-500 font-medium text-xs sm:text-sm">Débloque l'accès complet aux cours, vidéos et exercices corrigés.</p>
+                <h2 class="text-2xl sm:text-3xl font-black text-slate-900 mb-1.5">Choisis ta formule d'abonnement</h2>
+                <p class="text-slate-500 font-medium text-xs sm:text-sm">Débloque l'accès illimité à toutes les matières pour la durée de ton choix.</p>
                 <p id="premiumTargetMatiereMsg" class="mt-3 inline-block bg-amber-50 text-amber-700 font-bold px-4 py-1.5 rounded-full text-xs border border-amber-200 hidden"></p>
             </div>
 
             <div class="p-6 md:p-8 grid grid-cols-1 md:grid-cols-3 gap-5 bg-slate-50 rounded-b-[2rem]">
+                <!-- Pack 1 Mois -->
                 <div class="bg-white rounded-3xl p-5 border border-slate-200 shadow-sm hover:shadow-xl transition-all flex flex-col">
-                    <div class="text-slate-500 text-xs font-bold uppercase tracking-wider mb-1">Pack Solo</div>
-                    <div class="text-2xl font-black text-slate-900 mb-3"><span id="priceDisplaySolo">2 000</span> FCFA<span class="text-xs text-slate-400 font-medium">/mois</span></div>
+                    <div class="text-slate-500 text-xs font-bold uppercase tracking-wider mb-1">Pass Mensuel</div>
+                    <div class="text-2xl font-black text-slate-900 mb-3"><span id="priceDisplayMois">2 000</span> FCFA<span class="text-xs text-slate-400 font-medium"> / 1 Mois</span></div>
                     <ul class="space-y-2.5 mb-6 flex-grow text-xs text-slate-600 font-medium">
-                        <li class="flex gap-2"><i class="fas fa-check-circle text-emerald-500 mt-0.5"></i> 1 Matière au choix</li>
-                        <li class="flex gap-2"><i class="fas fa-check-circle text-emerald-500 mt-0.5"></i> Cours, Vidéos & PDF</li>
-                        <li class="flex gap-2"><i class="fas fa-check-circle text-emerald-500 mt-0.5"></i> Exercices corrigés & Quiz</li>
+                        <li class="flex gap-2"><i class="fas fa-check-circle text-emerald-500 mt-0.5"></i> Accès 30 jours illimité</li>
+                        <li class="flex gap-2"><i class="fas fa-check-circle text-emerald-500 mt-0.5"></i> Toutes les matières (SVT, Maths, PC...)</li>
+                        <li class="flex gap-2"><i class="fas fa-check-circle text-emerald-500 mt-0.5"></i> Cours, Vidéos, Exos & PDF</li>
                     </ul>
-                    <button onclick="orderSubscription('SOLO')" class="w-full py-2.5 rounded-xl font-bold text-xs bg-slate-100 text-slate-700 hover:bg-slate-200 transition">Choisir Solo</button>
+                    <button onclick="orderSubscriptionByDuration('1 Mois', 30)" class="w-full py-2.5 rounded-xl font-bold text-xs bg-slate-100 text-slate-700 hover:bg-slate-200 transition">Choisir 1 Mois</button>
                 </div>
 
-                <div class="bg-white rounded-3xl p-5 border border-slate-200 shadow-sm hover:shadow-xl transition-all flex flex-col">
-                    <div class="text-slate-500 text-xs font-bold uppercase tracking-wider mb-1">Pack Duo</div>
-                    <div class="text-2xl font-black text-slate-900 mb-3"><span id="priceDisplayDuo">3 500</span> FCFA<span class="text-xs text-slate-400 font-medium">/mois</span></div>
+                <!-- Pack Trimestre (3 Mois) -->
+                <div class="bg-white rounded-3xl p-5 border border-brand-200 shadow-sm hover:shadow-xl transition-all flex flex-col relative">
+                    <div class="text-brand-600 text-xs font-bold uppercase tracking-wider mb-1">Pass Trimestriel</div>
+                    <div class="text-2xl font-black text-slate-900 mb-3"><span id="priceDisplayTrimestre">5 000</span> FCFA<span class="text-xs text-slate-400 font-medium"> / 3 Mois</span></div>
                     <ul class="space-y-2.5 mb-6 flex-grow text-xs text-slate-600 font-medium">
-                        <li class="flex gap-2"><i class="fas fa-check-circle text-emerald-500 mt-0.5"></i> 2 Matières au choix</li>
-                        <li class="flex gap-2"><i class="fas fa-check-circle text-emerald-500 mt-0.5"></i> Cours, Vidéos & PDF</li>
-                        <li class="flex gap-2"><i class="fas fa-check-circle text-emerald-500 mt-0.5"></i> Exercices corrigés & Quiz</li>
+                        <li class="flex gap-2"><i class="fas fa-check-circle text-emerald-500 mt-0.5"></i> Accès 90 jours complet</li>
+                        <li class="flex gap-2"><i class="fas fa-check-circle text-emerald-500 mt-0.5"></i> Accès à l'ensemble du programme</li>
+                        <li class="flex gap-2"><i class="fas fa-check-circle text-emerald-500 mt-0.5"></i> Quiz interactifs & Annales</li>
                     </ul>
-                    <button onclick="orderSubscription('DUO')" class="w-full py-2.5 rounded-xl font-bold text-xs bg-slate-100 text-slate-700 hover:bg-slate-200 transition">Choisir Duo</button>
+                    <button onclick="orderSubscriptionByDuration('Trimestriel (3 Mois)', 90)" class="w-full py-2.5 rounded-xl font-bold text-xs bg-brand-50 text-brand-700 hover:bg-brand-100 transition">Choisir Trimestre</button>
                 </div>
 
+                <!-- Pack Semestre (6 Mois) - Recommandé -->
                 <div class="bg-slate-900 rounded-3xl p-5 border border-slate-800 shadow-xl relative flex flex-col md:-translate-y-2">
-                    <div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-amber-400 to-orange-500 text-white text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded-full shadow-md">Recommandé</div>
-                    <div class="text-brand-300 text-xs font-bold uppercase tracking-wider mb-1 mt-1">Pack Excellence</div>
-                    <div class="text-2xl font-black text-white mb-3"><span id="priceDisplayExcellence">5 000</span> FCFA<span class="text-xs text-slate-400 font-medium">/mois</span></div>
+                    <div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-amber-400 to-orange-500 text-white text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded-full shadow-md">Meilleure Offre</div>
+                    <div class="text-brand-300 text-xs font-bold uppercase tracking-wider mb-1 mt-1">Pass Semestriel</div>
+                    <div class="text-2xl font-black text-white mb-3"><span id="priceDisplaySemestre">9 000</span> FCFA<span class="text-xs text-slate-400 font-medium"> / 6 Mois</span></div>
                     <ul class="space-y-2.5 mb-6 flex-grow text-xs text-slate-300 font-medium">
-                        <li class="flex gap-2"><i class="fas fa-check-circle text-brand-400 mt-0.5"></i> Toutes les matières</li>
-                        <li class="flex gap-2"><i class="fas fa-check-circle text-brand-400 mt-0.5"></i> Accès total illimité</li>
+                        <li class="flex gap-2"><i class="fas fa-check-circle text-brand-400 mt-0.5"></i> Accès 180 jours (Semestre entier)</li>
+                        <li class="flex gap-2"><i class="fas fa-check-circle text-brand-400 mt-0.5"></i> Accès total & illimité à tout</li>
+                        <li class="flex gap-2"><i class="fas fa-check-circle text-brand-400 mt-0.5"></i> Économique & Révision examen</li>
                         <li class="flex gap-2"><i class="fas fa-check-circle text-brand-400 mt-0.5"></i> Support prioritaire WhatsApp</li>
                     </ul>
-                    <button onclick="orderSubscription('EXCELLENCE')" class="w-full py-2.5 rounded-xl font-black text-xs bg-gradient-to-r from-brand-500 to-brand-600 text-white shadow-lg hover:from-brand-400 hover:to-brand-500 transition flex items-center justify-center gap-2">
-                        <i class="fab fa-whatsapp text-sm"></i> S'abonner Tout de suite
+                    <button onclick="orderSubscriptionByDuration('Semestriel (6 Mois)', 180)" class="w-full py-2.5 rounded-xl font-black text-xs bg-gradient-to-r from-brand-500 to-brand-600 text-white shadow-lg hover:from-brand-400 hover:to-brand-500 transition flex items-center justify-center gap-2">
+                        <i class="fab fa-whatsapp text-sm"></i> S'abonner pour 6 Mois
                     </button>
                 </div>
             </div>
-        </div>
-    </div>
-
-    <!-- Modal Sélection Matières -->
-    <div id="subjectSelectionModal" class="hidden fixed inset-0 z-[115] flex items-center justify-center p-4 sm:p-6 bg-slate-900/80 backdrop-blur-md overflow-y-auto">
-        <div class="bg-white rounded-[2rem] p-6 sm:p-8 max-w-md w-full shadow-2xl relative animate-slide-up my-auto">
-            <button onclick="closeSubjectSelectionModal()" class="absolute top-5 right-5 text-slate-400 hover:text-slate-900 transition h-9 w-9 flex items-center justify-center bg-slate-50 hover:bg-slate-100 rounded-full" title="Retour">
-                <i class="fas fa-arrow-left text-xs"></i>
-            </button>
-            <div class="text-center mb-6">
-                <h2 class="text-xl font-black text-slate-900 leading-tight">Sélectionne tes matières</h2>
-                <p id="subjectSelectionSubtitle" class="text-slate-500 mt-1 font-medium text-xs">Tu as choisi ton pack d'abonnement.</p>
-            </div>
-            <div id="subjectSelectionList" class="space-y-2.5 mb-6"></div>
-            <button id="btnConfirmSubjects" onclick="confirmSubscription()" disabled class="w-full py-3.5 bg-brand-600 text-white rounded-xl font-bold text-xs sm:text-sm shadow-lg opacity-50 cursor-not-allowed transition-all flex items-center justify-center gap-2">
-                <span>Continuer vers WhatsApp</span> <i class="fab fa-whatsapp text-base"></i>
-            </button>
         </div>
     </div>
 
@@ -631,7 +618,7 @@
                 </div>
             </div>
 
-            <!-- Section 4 : Gestion des Paramètres et Prix -->
+            <!-- Section 4 : Gestion des Paramètres et Prix par durée -->
             <div id="adminSectionParams" class="hidden space-y-6">
                 <div class="bg-slate-50 p-5 rounded-2xl border border-slate-200 max-w-xl">
                     <h3 class="text-sm font-black text-slate-800 mb-4"><i class="fas fa-sliders-h text-purple-600 mr-1.5"></i> Configuration de la plateforme</h3>
@@ -646,16 +633,16 @@
                         </div>
                         <div class="pt-2 border-t border-slate-200 grid grid-cols-3 gap-3">
                             <div>
-                                <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Prix Pack Solo</label>
-                                <input type="number" id="paramPrixSolo" required min="0" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold">
+                                <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Prix 1 Mois (FCFA)</label>
+                                <input type="number" id="paramPrixMois" required min="0" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold">
                             </div>
                             <div>
-                                <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Prix Pack Duo</label>
-                                <input type="number" id="paramPrixDuo" required min="0" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold">
+                                <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Prix Trimestre (3M)</label>
+                                <input type="number" id="paramPrixTrimestre" required min="0" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold">
                             </div>
                             <div>
-                                <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Prix Excellence</label>
-                                <input type="number" id="paramPrixExcellence" required min="0" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold">
+                                <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Prix Semestre (6M)</label>
+                                <input type="number" id="paramPrixSemestre" required min="0" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold">
                             </div>
                         </div>
                         <button type="submit" class="w-full py-3 bg-purple-700 text-white rounded-xl font-bold text-xs shadow-md hover:bg-purple-800 transition">
@@ -678,18 +665,18 @@
         const FALLBACK_CLASSES = ['Terminale', '1ère S', '2nd S', '3ème', '4ème'];
         const FALLBACK_MATIERES = ['SVT', 'MATHS', 'PC'];
 
-        // Known metadata mapping for standard subjects (fallback styling for dynamic unknown subjects)
-       const SUBJECT_METADATA = {
-    'SVT': { label: 'SVT', fullName: 'Sciences de la Vie et de la Terre', icon: 'fa-leaf', tabStyle: 'active-svt', colorClass: 'bg-emerald-50 text-emerald-600' },
-    'MATHS': { label: 'Mathématiques', fullName: 'Mathématiques', icon: 'fa-calculator', tabStyle: 'active-maths', colorClass: 'bg-red-50 text-red-600' },
-    'PC': { label: 'Physique-Chimie', fullName: 'Physique - Chimie', icon: 'fa-atom', tabStyle: 'active-pc', colorClass: 'bg-purple-50 text-purple-600' },
-    'Philo': { label: 'Philosophie', fullName: 'Philosophie', icon: 'fa-brain', tabStyle: 'active-generic', colorClass: 'bg-amber-50 text-amber-600' },
-    'Francais': { label: 'Français', fullName: 'Français', icon: 'fa-book', tabStyle: 'active-generic', colorClass: 'bg-blue-50 text-blue-600' },
-    'Anglais': { label: 'Anglais', fullName: 'Anglais', icon: 'fa-language', tabStyle: 'active-generic', colorClass: 'bg-indigo-50 text-indigo-600' },
-    'Espagnol': { label: 'Espagnol', fullName: 'Espagnol', icon: 'fa-comment-alt', tabStyle: 'active-generic', colorClass: 'bg-orange-50 text-orange-600' },
-    'arabe': { label: 'Arabe', fullName: 'Arabe', icon: 'fa-pen-nib', tabStyle: 'active-generic', colorClass: 'bg-teal-50 text-teal-600' },
-    'HG': { label: 'Histoire-Géo', fullName: 'Histoire et Géographie', icon: 'fa-globe', tabStyle: 'active-generic', colorClass: 'bg-sky-50 text-sky-600' }
-};
+        // Known metadata mapping for standard subjects
+        const SUBJECT_METADATA = {
+            'SVT': { label: 'SVT', fullName: 'Sciences de la Vie et de la Terre', icon: 'fa-leaf', tabStyle: 'active-svt', colorClass: 'bg-emerald-50 text-emerald-600' },
+            'MATHS': { label: 'Mathématiques', fullName: 'Mathématiques', icon: 'fa-calculator', tabStyle: 'active-maths', colorClass: 'bg-red-50 text-red-600' },
+            'PC': { label: 'Physique-Chimie', fullName: 'Physique - Chimie', icon: 'fa-atom', tabStyle: 'active-pc', colorClass: 'bg-purple-50 text-purple-600' },
+            'Philo': { label: 'Philosophie', fullName: 'Philosophie', icon: 'fa-brain', tabStyle: 'active-generic', colorClass: 'bg-amber-50 text-amber-600' },
+            'Francais': { label: 'Français', fullName: 'Français', icon: 'fa-book', tabStyle: 'active-generic', colorClass: 'bg-blue-50 text-blue-600' },
+            'Anglais': { label: 'Anglais', fullName: 'Anglais', icon: 'fa-language', tabStyle: 'active-generic', colorClass: 'bg-indigo-50 text-indigo-600' },
+            'Espagnol': { label: 'Espagnol', fullName: 'Espagnol', icon: 'fa-comment-alt', tabStyle: 'active-generic', colorClass: 'bg-orange-50 text-orange-600' },
+            'arabe': { label: 'Arabe', fullName: 'Arabe', icon: 'fa-pen-nib', tabStyle: 'active-generic', colorClass: 'bg-teal-50 text-teal-600' },
+            'HG': { label: 'Histoire-Géo', fullName: 'Histoire et Géographie', icon: 'fa-globe', tabStyle: 'active-generic', colorClass: 'bg-sky-50 text-sky-600' }
+        };
 
         // Global State
         let adminPhone = "221768776668";
@@ -708,10 +695,6 @@
         let dynamicClasses = [];
         let dynamicMatieres = [];
         let pendingActivationWhatsAppUrl = '';
-        
-        let currentPackToSubscribe = '';
-        let maxSubjectsAllowed = 0;
-        let selectedSubjectsForSub = [];
         
         let currentQuizData = null; 
         let currentQuestionIndex = 0;
@@ -747,7 +730,6 @@
                 .trim();
         }
 
-        // Automatic Welcome Modal for Non-Logged-In Visitors
         function checkAndShowWelcomeVisitorModal() {
             if (currentUser) return;
             const shownInSession = sessionStorage.getItem('excellence_welcome_shown');
@@ -767,10 +749,6 @@
             if (welcomeModal) welcomeModal.classList.add('hidden');
         }
 
-        // ============================================================
-        // DÉTECTION D'APPAREIL ET DE NAVIGATEUR
-        // ============================================================
-        
         function isMobileDevice() {
             return /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent) 
                 || (navigator.maxTouchPoints > 1 && window.innerWidth < 900);
@@ -822,6 +800,7 @@
             throwOnError: false,
             strict: false
         };
+
         function renderMath(el, tries) {
             if (!el) return;
             if (typeof renderMathInElement === 'function' && typeof katex !== 'undefined') {
@@ -878,9 +857,9 @@
         }
 
         function updatePricesInUI() {
-            if (dbParameters['prix_solo']) document.getElementById('priceDisplaySolo').innerText = Number(dbParameters['prix_solo']).toLocaleString();
-            if (dbParameters['prix_duo']) document.getElementById('priceDisplayDuo').innerText = Number(dbParameters['prix_duo']).toLocaleString();
-            if (dbParameters['prix_excellence']) document.getElementById('priceDisplayExcellence').innerText = Number(dbParameters['prix_excellence']).toLocaleString();
+            if (dbParameters['prix_mois']) document.getElementById('priceDisplayMois').innerText = Number(dbParameters['prix_mois']).toLocaleString();
+            if (dbParameters['prix_trimestre']) document.getElementById('priceDisplayTrimestre').innerText = Number(dbParameters['prix_trimestre']).toLocaleString();
+            if (dbParameters['prix_semestre']) document.getElementById('priceDisplaySemestre').innerText = Number(dbParameters['prix_semestre']).toLocaleString();
         }
 
         async function verifyUserStatusSilently() {
@@ -1029,23 +1008,6 @@
             const newAnnaleMatiere = document.getElementById('newAnnaleMatiere');
             if (newAnnaleMatiere) {
                 newAnnaleMatiere.innerHTML = dynamicMatieres.map(m => `<option value="${sanitizeInput(m)}">${sanitizeInput(getSubjectMeta(m).label)}</option>`).join('');
-            }
-
-            // 6. Subject Selection Modal
-            const subjectSelectionList = document.getElementById('subjectSelectionList');
-            if (subjectSelectionList) {
-                subjectSelectionList.innerHTML = dynamicMatieres.map(mat => {
-                    const meta = getSubjectMeta(mat);
-                    return `
-                        <button onclick="toggleSubjectSelection('${sanitizeInput(mat)}')" id="btnSelect_${sanitizeInput(mat)}" class="w-full p-3.5 rounded-xl border-2 border-slate-200 bg-white flex items-center justify-between transition-all hover:border-brand-200 group">
-                            <div class="flex items-center gap-3">
-                                <div class="w-9 h-9 rounded-lg ${meta.colorClass} flex items-center justify-center text-sm"><i class="fas ${meta.icon}"></i></div>
-                                <span class="font-bold text-slate-700 text-xs sm:text-sm">${sanitizeInput(meta.fullName)}</span>
-                            </div>
-                            <div class="w-5 h-5 rounded-full border-2 border-slate-300 check-indicator flex items-center justify-center text-white transition-colors"></div>
-                        </button>
-                    `;
-                }).join('');
             }
         }
 
@@ -1214,9 +1176,7 @@
             renderMath(grid);
         }
 
-        // ============================================================
-        // LECTEUR VIDÉO PRINCIPAL (ZONE DÉDIÉE HORS DES CARTES)
-        // ============================================================
+        // LECTEUR VIDÉO PRINCIPAL
         function buildVideoSource(raw) {
             const v = String(raw || '').trim();
             if (!v || v === 'null' || v === 'undefined') return null;
@@ -1409,13 +1369,6 @@
                     showToast("Ton abonnement a expiré.", "error");
                     return true;
                 }
-                
-                const userAboArray = currentUser.abonnements || [];
-                if (!userAboArray.includes(matiere)) { 
-                    intendedPremiumMatiere = matiere; 
-                    showPremiumOptionsModal(); 
-                    return true; 
-                }
             }
             return false;
         }
@@ -1535,7 +1488,7 @@
             const msgEl = document.getElementById('premiumTargetMatiereMsg');
             if(intendedPremiumMatiere) {
                 const meta = getSubjectMeta(intendedPremiumMatiere);
-                msgEl.innerText = `Accès restreint : Les cours de ${meta.fullName} nécessitent un abonnement.`;
+                msgEl.innerText = `Accès restreint : Débloque tes cours de ${meta.fullName} en choisissant ta durée d'abonnement.`;
                 msgEl.classList.remove('hidden');
             } else { 
                 msgEl.classList.add('hidden'); 
@@ -1548,89 +1501,11 @@
             intendedPremiumMatiere = null; 
         }
 
-        function orderSubscription(packType) {
-            if (packType === 'EXCELLENCE') { 
-                sendWhatsAppSubscription('EXCELLENCE', dynamicMatieres.map(m => getSubjectMeta(m).fullName)); 
-                return; 
-            }
-            currentPackToSubscribe = packType; 
-            maxSubjectsAllowed = packType === 'SOLO' ? 1 : 2; 
-            selectedSubjectsForSub = [];
-            
-            if (intendedPremiumMatiere && selectedSubjectsForSub.length < maxSubjectsAllowed) {
-                selectedSubjectsForSub.push(intendedPremiumMatiere);
-            }
-            
-            document.getElementById('subjectSelectionSubtitle').innerText = `Tu as sélectionné le Pack ${packType === 'SOLO' ? 'Solo (1 matière)' : 'Duo (2 matières)'}.`;
-            updateSubjectSelectionUI();
-            document.getElementById('premiumOptionsModal').classList.add('hidden');
-            document.getElementById('subjectSelectionModal').classList.remove('hidden');
-        }
-
-        function toggleSubjectSelection(matiere) {
-            const index = selectedSubjectsForSub.indexOf(matiere);
-            if (index > -1) {
-                selectedSubjectsForSub.splice(index, 1);
-            } else {
-                if (selectedSubjectsForSub.length < maxSubjectsAllowed) {
-                    selectedSubjectsForSub.push(matiere);
-                } else { 
-                    showToast(`Tu peux sélectionner maximum ${maxSubjectsAllowed} matière(s).`, "warning"); 
-                    return; 
-                }
-            }
-            updateSubjectSelectionUI();
-        }
-
-        function updateSubjectSelectionUI() {
-            dynamicMatieres.forEach(sub => {
-                const btn = document.getElementById(`btnSelect_${sub}`); 
-                if (!btn) return;
-                const indicator = btn.querySelector('.check-indicator');
-                if (selectedSubjectsForSub.includes(sub)) {
-                    btn.classList.remove('border-slate-200', 'bg-white'); 
-                    btn.classList.add('border-brand-500', 'bg-brand-50');
-                    indicator.classList.remove('border-slate-300'); 
-                    indicator.classList.add('border-brand-600', 'bg-brand-600');
-                    indicator.innerHTML = '<i class="fas fa-check text-xs"></i>';
-                } else {
-                    btn.classList.add('border-slate-200', 'bg-white'); 
-                    btn.classList.remove('border-brand-500', 'bg-brand-50');
-                    indicator.classList.add('border-slate-300'); 
-                    indicator.classList.remove('border-brand-600', 'bg-brand-600');
-                    indicator.innerHTML = '';
-                }
-            });
-            const confirmBtn = document.getElementById('btnConfirmSubjects');
-            if (selectedSubjectsForSub.length === maxSubjectsAllowed) {
-                confirmBtn.disabled = false; 
-                confirmBtn.classList.remove('opacity-50', 'cursor-not-allowed'); 
-                confirmBtn.classList.add('hover:-translate-y-0.5', 'hover:bg-brand-700');
-            } else {
-                confirmBtn.disabled = true; 
-                confirmBtn.classList.add('opacity-50', 'cursor-not-allowed'); 
-                confirmBtn.classList.remove('hover:-translate-y-0.5', 'hover:bg-brand-700');
-            }
-        }
-
-        function closeSubjectSelectionModal() { 
-            document.getElementById('subjectSelectionModal').classList.add('hidden'); 
-            document.getElementById('premiumOptionsModal').classList.remove('hidden'); 
-        }
-
-        function confirmSubscription() {
-            if (selectedSubjectsForSub.length !== maxSubjectsAllowed) return;
-            const displayNames = selectedSubjectsForSub.map(s => getSubjectMeta(s).fullName);
-            sendWhatsAppSubscription(currentPackToSubscribe, displayNames); 
-            closeSubjectSelectionModal(); 
-            intendedPremiumMatiere = null; 
-        }
-
-        function sendWhatsAppSubscription(packType, subjectsArray) {
+        function orderSubscriptionByDuration(durationLabel, daysCount) {
             let nomClient = currentUser ? `*${sanitizeInput(currentUser.nom)}* (Classe: ${sanitizeInput(currentUser.classe)})` : "un élève";
-            let packName = packType === 'EXCELLENCE' ? 'PACK EXCELLENCE' : packType === 'DUO' ? 'PACK DUO (2 Matières)' : 'PACK SOLO (1 Matière)';
-            let message = `Bonjour Excellence Académie ! 👋\nC'est ${nomClient}.\n\nJe souhaite souscrire au *${packName}* 🚀\nMatières : *${subjectsArray.join(' et ')}*\n\nQuelles sont les instructions pour effectuer le paiement et activer mon accès ?`;
+            let message = `Bonjour Excellence Académie ! 👋\nC'est ${nomClient}.\n\nJe souhaite souscrire à la formule *${durationLabel}* (Accès illimité pendant ${daysCount} jours) 🚀\n\nQuelles sont les instructions pour effectuer le paiement et activer mon accès ?`;
             window.open(`https://wa.me/${adminPhone}?text=${encodeURIComponent(message)}`, '_blank');
+            closePremiumOptionsModal();
         }
 
         function showAuthModal(mode) {
@@ -1677,7 +1552,6 @@
                     const motsNom = nom.split(/\s+/);
                     if (motsNom.length < 2) throw new Error("Veuillez taper votre prénom ET votre nom complet (ex: Moussa Diop).");
 
-                    // Check duplicate on application side only
                     const normNom = normalizeString(nom);
                     const normClasse = normalizeString(classe);
 
@@ -1703,7 +1577,6 @@
                         return;
                     }
 
-                    // Create inactive account - Never display Code ID to student
                     const generatedId = "E" + Math.random().toString(36).substring(2, 5).toUpperCase();
                     const internalRef = `REF-${generatedId}-${Math.floor(1000 + Math.random() * 9000)}`;
 
@@ -1712,7 +1585,7 @@
                         nom: nom,
                         classe: classe,
                         actif: false,
-                        abonnements: [dynamicMatieres[0] || 'SVT']
+                        abonnements: [...dynamicMatieres]
                     }]);
                     if (error) throw error;
 
@@ -1765,7 +1638,7 @@
                         await sbClient.from('eleves').update({ device_id: currentDeviceId }).eq('id', id);
                     }
 
-                    if(!data.abonnements) data.abonnements = data.actif ? [dynamicMatieres[0] || 'SVT'] : [];
+                    if(!data.abonnements) data.abonnements = [...dynamicMatieres];
                     data.login_time = Date.now();
                     currentUser = data; 
                     localStorage.setItem('svt_user_session', JSON.stringify(data));
@@ -1823,18 +1696,8 @@
             if (isUserExpired()) {
                 intendedPremiumMatiere = matiere;
                 showPremiumOptionsModal();
-                showToast("Ton abonnement a expiré. Choisis un pack pour continuer.", "warning");
+                showToast("Ton abonnement a expiré. Choisis une formule pour continuer.", "warning");
                 return;
-            }
-
-            if (isPremium && !currentUser.isAdmin) {
-                const userAboArray = currentUser.abonnements || [];
-                if (!userAboArray.includes(matiere)) {
-                    intendedPremiumMatiere = matiere;
-                    showPremiumOptionsModal();
-                    showToast("Ce cours nécessite un abonnement pour cette matière.", "warning");
-                    return;
-                }
             }
 
             if (!url || url === 'null' || url === 'undefined') {
@@ -1855,18 +1718,8 @@
             if (isUserExpired()) {
                 intendedPremiumMatiere = matiere;
                 showPremiumOptionsModal();
-                showToast("Ton abonnement a expiré. Choisis un pack pour continuer.", "warning");
+                showToast("Ton abonnement a expiré. Choisis une formule pour continuer.", "warning");
                 return;
-            }
-
-            if (isPremium && !currentUser.isAdmin) {
-                const userAboArray = currentUser.abonnements || [];
-                if (!userAboArray.includes(matiere)) {
-                    intendedPremiumMatiere = matiere;
-                    showPremiumOptionsModal();
-                    showToast("Ce quiz nécessite un abonnement pour cette matière.", "warning");
-                    return;
-                }
             }
 
             currentQuestionIndex = 0; 
@@ -2151,14 +2004,8 @@
             filtered.forEach(eleve => {
                 const tr = document.createElement('tr');
                 tr.className = "hover:bg-slate-50 transition";
-                const abos = eleve.abonnements || [];
                 const isActif = eleve.actif === true;
                 const expDate = eleve.date_expiration ? eleve.date_expiration.split('T')[0] : 'Non définie';
-
-                const abosButtons = dynamicMatieres.map(m => {
-                    const hasMatiere = abos.includes(m);
-                    return `<button onclick="toggleAdminAbo('${eleve.id}', '${sanitizeInput(m)}')" class="px-2 py-0.5 rounded text-[10px] font-bold ${hasMatiere ? 'bg-purple-100 text-purple-800 border border-purple-300' : 'bg-slate-100 text-slate-400'}">${sanitizeInput(m)}</button>`;
-                }).join(' ');
 
                 tr.innerHTML = `
                     <td class="p-3 font-black text-purple-700">${sanitizeInput(eleve.id)}</td>
@@ -2167,7 +2014,7 @@
                         <div class="text-[10px] text-slate-400 font-bold uppercase">${sanitizeInput(eleve.classe)}</div>
                     </td>
                     <td class="p-3">
-                        <div class="flex flex-wrap gap-1">${abosButtons}</div>
+                        <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-purple-100 text-purple-800 border border-purple-200">Accès Toutes Matières</span>
                     </td>
                     <td class="p-3 font-medium text-slate-600">${expDate}</td>
                     <td class="p-3">
@@ -2176,12 +2023,13 @@
                         </span>
                     </td>
                     <td class="p-3 text-right">
-                        <div class="flex items-center justify-end gap-1.5">
-                            <button onclick="toggleAdminEleveActif('${eleve.id}', ${!isActif})" class="px-2.5 py-1 rounded-lg text-[10px] font-bold ${isActif ? 'bg-amber-100 text-amber-800 hover:bg-amber-200' : 'bg-emerald-600 text-white hover:bg-emerald-700'}" title="Changer le statut">
+                        <div class="flex items-center justify-end gap-1">
+                            <button onclick="toggleAdminEleveActif('${eleve.id}', ${!isActif})" class="px-2 py-1 rounded-lg text-[10px] font-bold ${isActif ? 'bg-amber-100 text-amber-800 hover:bg-amber-200' : 'bg-emerald-600 text-white hover:bg-emerald-700'}" title="Changer le statut">
                                 ${isActif ? 'Désactiver' : 'Activer'}
                             </button>
-                            <button onclick="extendAdminEleveDays('${eleve.id}', 30)" class="px-2 py-1 bg-slate-100 text-slate-700 rounded-lg text-[10px] font-bold hover:bg-slate-200">+30j</button>
-                            <button onclick="extendAdminEleveDays('${eleve.id}', 90)" class="px-2 py-1 bg-slate-100 text-slate-700 rounded-lg text-[10px] font-bold hover:bg-slate-200">+90j</button>
+                            <button onclick="extendAdminEleveDays('${eleve.id}', 30)" class="px-2 py-1 bg-slate-100 text-slate-700 rounded-lg text-[10px] font-bold hover:bg-slate-200">+1M</button>
+                            <button onclick="extendAdminEleveDays('${eleve.id}', 90)" class="px-2 py-1 bg-slate-100 text-slate-700 rounded-lg text-[10px] font-bold hover:bg-slate-200">+3M</button>
+                            <button onclick="extendAdminEleveDays('${eleve.id}', 180)" class="px-2 py-1 bg-slate-100 text-slate-700 rounded-lg text-[10px] font-bold hover:bg-slate-200">+6M</button>
                             <button onclick="resetAdminDevice('${eleve.id}')" class="p-1.5 bg-blue-50 text-blue-600 rounded-lg text-[10px] hover:bg-blue-100" title="Réinitialiser l'appareil lié"><i class="fas fa-mobile-alt"></i></button>
                             <button onclick="deleteAdminEleve('${eleve.id}')" class="p-1.5 bg-red-50 text-red-600 rounded-lg text-[10px] hover:bg-red-100" title="Supprimer l'élève"><i class="fas fa-trash"></i></button>
                         </div>
@@ -2201,22 +2049,6 @@
             const { error } = await sbClient.from('eleves').update(updatePayload).eq('id', id);
             if (!error) {
                 showToast("Statut de l'élève mis à jour", "success");
-                await loadAdminEleves();
-            }
-        }
-
-        async function toggleAdminAbo(id, matiere) {
-            const eleve = allEleves.find(e => e.id === id);
-            if (!eleve) return;
-            let abos = eleve.abonnements || [];
-            if (abos.includes(matiere)) {
-                abos = abos.filter(m => m !== matiere);
-            } else {
-                abos.push(matiere);
-            }
-            const { error } = await sbClient.from('eleves').update({ abonnements: abos }).eq('id', id);
-            if (!error) {
-                showToast("Abonnements mis à jour", "success");
                 await loadAdminEleves();
             }
         }
@@ -2364,9 +2196,9 @@
         function loadAdminParamsUI() {
             document.getElementById('paramCodeAdmin').value = dbParameters['code_admin'] || '';
             document.getElementById('paramWhatsapp').value = dbParameters['whatsapp_phone'] || '';
-            document.getElementById('paramPrixSolo').value = dbParameters['prix_solo'] || '2000';
-            document.getElementById('paramPrixDuo').value = dbParameters['prix_duo'] || '3500';
-            document.getElementById('paramPrixExcellence').value = dbParameters['prix_excellence'] || '5000';
+            document.getElementById('paramPrixMois').value = dbParameters['prix_mois'] || '2000';
+            document.getElementById('paramPrixTrimestre').value = dbParameters['prix_trimestre'] || '5000';
+            document.getElementById('paramPrixSemestre').value = dbParameters['prix_semestre'] || '9000';
         }
 
         async function handleSaveParams(e) {
@@ -2374,9 +2206,9 @@
             const updates = [
                 { cle: 'code_admin', valeur: sanitizeInput(document.getElementById('paramCodeAdmin').value) },
                 { cle: 'whatsapp_phone', valeur: sanitizeInput(document.getElementById('paramWhatsapp').value) },
-                { cle: 'prix_solo', valeur: sanitizeInput(document.getElementById('paramPrixSolo').value) },
-                { cle: 'prix_duo', valeur: sanitizeInput(document.getElementById('paramPrixDuo').value) },
-                { cle: 'prix_excellence', valeur: sanitizeInput(document.getElementById('paramPrixExcellence').value) }
+                { cle: 'prix_mois', valeur: sanitizeInput(document.getElementById('paramPrixMois').value) },
+                { cle: 'prix_trimestre', valeur: sanitizeInput(document.getElementById('paramPrixTrimestre').value) },
+                { cle: 'prix_semestre', valeur: sanitizeInput(document.getElementById('paramPrixSemestre').value) }
             ];
 
             const { error } = await sbClient.from('parametres').upsert(updates, { onConflict: 'cle' });
